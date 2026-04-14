@@ -855,8 +855,28 @@ function updatePhysics() {
       }
     }
 
-    // Allow full steering authority even when completely stopped
-    p.angle += p.steer * TURN_SPEED;
+    if (!p.isBot) {
+      // ── Direct Heading Interpolation ─────────────────────────────────────────
+      // Instead of accumulating angular velocity, we lerp directly toward the
+      // target angle driven by the phone tilt. This means the car stops rotating
+      // the instant the player levels the phone — zero rotational inertia.
+      const currentSpeed = Math.hypot(p.vx, p.vy);
+
+      // Speed-scaled sensitivity: full authority at low speed, ~30% at top speed
+      // This prevents high-speed spin-outs when the tilt is slammed to one side.
+      const speedSensScale = 1 / (1 + currentSpeed * 0.35);
+      const maxTurnThisFrame = TURN_SPEED * speedSensScale;
+
+      // p.steer is a float in [-1, 1] sent from the phone tilt
+      const targetAngleDelta = p.steer * maxTurnThisFrame;
+
+      // Lerp current angle toward desired heading (smooth but instant-stopping)
+      p.angle += targetAngleDelta * 0.85;
+      // ── End Direct Heading ────────────────────────────────────────────────────
+    } else {
+      // AI uses old simple accumulation (it doesn't need finesse)
+      p.angle += p.steer * TURN_SPEED;
+    }
 
     if (p.gas === 1) {
       p.vx += Math.cos(p.angle) * ENGINE_POWER;
@@ -894,9 +914,12 @@ function updatePhysics() {
 
     // Speed-dependent grip: faster → more drift allowed (less lateral grip)
     const currentSpeed = Math.hypot(p.vx, p.vy);
-    const driftFactor = Math.min(currentSpeed / 4, 1);   // 0 at rest → 1 at full speed
-    const LATERAL_GRIP_BASE = 0.78;               // Strong base grip
-    const LATERAL_GRIP_DRIFT = 0.92;              // Loose grip at high speed
+    
+    // Aggressive grip for humans — near-zero lateral slip at all speeds.
+    // Players need precise cornering, not arcade drift physics.
+    const LATERAL_GRIP_BASE = p.isBot ? 0.78 : 0.30;  // Humans grip HARD
+    const LATERAL_GRIP_DRIFT = p.isBot ? 0.92 : 0.55; // Even at speed, minimal slide
+    const driftFactor = Math.min(currentSpeed / 4, 1);
     const lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
 
     // Apply separate friction to each axis (longitudinal rolls freely, lateral grips)
