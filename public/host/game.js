@@ -155,8 +155,8 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-const ENGINE_POWER = 0.08;
-const FRICTION = 0.95;
+const ENGINE_POWER = 0.024;
+const FRICTION = 0.985;
 const TURN_SPEED = 0.055;
 
 function drawGrid() {
@@ -829,9 +829,9 @@ function updatePhysics() {
       p.vx += Math.cos(p.angle) * ENGINE_POWER;
       p.vy += Math.sin(p.angle) * ENGINE_POWER;
     } else if (p.gas === -1) {
-      // Braking / Reverse (slightly weaker than gas)
-      p.vx -= Math.cos(p.angle) * (ENGINE_POWER * 0.7);
-      p.vy -= Math.sin(p.angle) * (ENGINE_POWER * 0.7);
+      // Braking / Reverse (Strong fixed deceleration)
+      p.vx -= Math.cos(p.angle) * 0.06;
+      p.vy -= Math.sin(p.angle) * 0.06;
     }
 
     // Mathematical Map Boundaries (Grass Simulation)
@@ -1001,9 +1001,9 @@ function loop() {
     const speedsDist = {};
     Object.keys(players).forEach(id => {
       if (!players[id].isBot) {
-        // Convert velocity magnitude to KM/H equivalent (approx 120kmh flat out)
+        // Double the displayed visual speed
         let v = Math.hypot(players[id].vx, players[id].vy);
-        speedsDist[id] = Math.round(v * 26); 
+        speedsDist[id] = Math.round(v * 52); 
       }
     });
     if (Object.keys(speedsDist).length > 0) {
