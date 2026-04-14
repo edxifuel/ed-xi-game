@@ -100,10 +100,47 @@ socket.on('raceStart', (settings) => {
          steer: 0,
          gas: 0
        };
-    }
+     }
     updatePlayerList();
   }
+  
+  // Align all karts at start/finish line before race begins
+  alignStartingGrid();
 });
+
+function alignStartingGrid() {
+  const pts = getWaypoints();
+  if (pts.length < 2) return;
+  const p0 = pts[0];
+  const p1 = pts[5]; // Use a point slightly ahead for a better direction vector
+  
+  const dx = p1.x - p0.x;
+  const dy = p1.y - p0.y;
+  const dist = Math.hypot(dx, dy);
+  
+  const fx = dx / dist;
+  const fy = dy / dist;
+  
+  const nx = -fy;
+  const ny = fx;
+  
+  const startAngle = Math.atan2(dy, dx);
+  
+  const playerKeys = Object.keys(players);
+  for(let i = 0; i < playerKeys.length; i++) {
+    const p = players[playerKeys[i]];
+    
+    const row = Math.floor(i / 2);
+    const side = (i % 2 === 0) ? -1 : 1;
+    
+    // Position offset backwards from start line
+    p.x = p0.x - (fx * (row * 40)) + (nx * (side * 20));
+    p.y = p0.y - (fy * (row * 40)) + (ny * (side * 20));
+    p.angle = startAngle;
+    p.vx = 0;
+    p.vy = 0;
+  }
+}
 
 function updatePlayerList() {
   playerList.innerHTML = '';
@@ -118,9 +155,9 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-const ENGINE_POWER = 0.16;
+const ENGINE_POWER = 0.08;
 const FRICTION = 0.95;
-const TURN_SPEED = 0.08;
+const TURN_SPEED = 0.04;
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
