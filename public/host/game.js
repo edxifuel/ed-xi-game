@@ -864,14 +864,16 @@ function updatePhysics() {
       // ── Speed-Gated Direct Steering ───────────────────────────────────────
       const currentSpeed = Math.hypot(p.vx, p.vy);
 
-      // LOW-SPEED RAMP: steering authority is 0 at rest and ramps to 1.0
-      // at speed ~1.2. This prevents spinning in place.
+      // LOW-SPEED RAMP: 0 steering at rest, full at speed ~1.2
       const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
 
-      // HIGH-SPEED REDUCTION: prevents spin-outs at top speed.
+      // HIGH-SPEED REDUCTION: prevents spin-outs at top speed
       const highSpeedFactor = 1 / (1 + currentSpeed * 0.25);
 
-      p.angle += p.steer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+      // Clamp max heading change per frame (~0.045 rad = ~2.5°/frame = ~45°/sec at 60fps)
+      const rawDelta = p.steer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+      const MAX_DELTA = 0.045;
+      p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
       // AI uses simple accumulation

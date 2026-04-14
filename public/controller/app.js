@@ -239,7 +239,7 @@ function handleOrientation(event) {
 
   // Dead zone: ignore ±5° of natural hand wobble
   const DEAD_ZONE = 5;
-  const STEER_RANGE = 30; // degrees of tilt = full lock
+  const STEER_RANGE = 25; // degrees of tilt for full lock (tighter = more natural feel)
 
   let raw = 0;
   if (Math.abs(tilt) > DEAD_ZONE) {
@@ -258,10 +258,8 @@ function handleOrientation(event) {
   }
 }
 
-// Any tap re-calibrates neutral so players can adjust their grip mid-game
-document.addEventListener('touchstart', () => {
-  steerOffset = null;
-}, { passive: true });
+// NOTE: Steering calibrates once on the first orientation event after joining.
+// No touch-based recalibration — gas/brake taps should never affect steering zero-point.
 
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
