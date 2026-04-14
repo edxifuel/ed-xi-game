@@ -386,11 +386,33 @@ function updatePhysics() {
     let currentFriction = FRICTION;
     const distFromCenter = getDistToTrack(p.x, p.y, waypoints);
     if (distFromCenter > 40) {
-      currentFriction = 0.85; // 50% max speed penalty on grass
+      currentFriction = 0.85; // Off-road grip penalty
     }
 
-    p.vx *= currentFriction;
-    p.vy *= currentFriction;
+    // ── Vector Decomposition Physics ──────────────────────────────────────────
+    // Resolve vx/vy into the car's local coordinate frame (forward / lateral)
+    const cosA = Math.cos(p.angle);
+    const sinA = Math.sin(p.angle);
+
+    // Dot-product projections onto heading axis and perpendicular (lateral) axis
+    const forwardVel  =  p.vx * cosA + p.vy * sinA;   // +ve = moving forward
+    const lateralVel  = -p.vx * sinA + p.vy * cosA;   // +ve = sliding right
+
+    // Speed-dependent grip: faster → more drift allowed (less lateral grip)
+    const speed = Math.hypot(p.vx, p.vy);
+    const driftFactor = Math.min(speed / 4, 1);   // 0 at rest → 1 at full speed
+    const LATERAL_GRIP_BASE = 0.78;               // Strong base grip
+    const LATERAL_GRIP_DRIFT = 0.92;              // Loose grip at high speed
+    const lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
+
+    // Apply separate friction to each axis (longitudinal rolls freely, lateral grips)
+    const newForward = forwardVel * currentFriction;
+    const newLateral = lateralVel * lateralFriction;
+
+    // Recompose back into world-space vx/vy
+    p.vx = cosA * newForward - sinA * newLateral;
+    p.vy = sinA * newForward + cosA * newLateral;
+    // ── End Vector Decomposition ───────────────────────────────────────────────
     
     p.x += p.vx;
     p.y += p.vy;
