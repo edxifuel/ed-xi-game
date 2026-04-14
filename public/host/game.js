@@ -123,7 +123,12 @@ socket.on('raceStart', (settings) => {
     p.lastLapMark = Date.now();
     p.lapsCompleted = 0;
     p.targetWaypoint = 0;
+    p.vx = 0;
+    p.vy = 0;
   });
+  
+  // Place all karts at the start/finish line for qualifying
+  alignStartingGrid();
 });
 
 function alignStartingGrid(sortedKeys) {
