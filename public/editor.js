@@ -114,6 +114,9 @@ function render() {
   
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+  
+  // Make track transparent so the underlying map image remains visible!
+  ctx.globalAlpha = 0.4;
 
   // Grass
   ctx.beginPath();
@@ -134,6 +137,7 @@ function render() {
   ctx.stroke();
 
   // Nodes
+  ctx.globalAlpha = 1.0;
   ctx.fillStyle = '#FF0055';
   rawPoints.forEach(p => {
     ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
