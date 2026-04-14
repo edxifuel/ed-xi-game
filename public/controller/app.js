@@ -93,6 +93,14 @@ socket.on('joinSuccess', (data) => {
       socket.emit('confirmSettings', currentRoomCode);
       vipScreen.classList.remove('active');
       waitScreen.classList.add('active');
+      
+      const forceStartBtn = document.getElementById('force-start-btn');
+      if (forceStartBtn) {
+        forceStartBtn.style.display = 'inline-block';
+        forceStartBtn.addEventListener('click', () => {
+          socket.emit('forceStart', currentRoomCode);
+        });
+      }
     });
   } else {
     waitScreen.classList.add('active');

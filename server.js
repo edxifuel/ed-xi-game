@@ -145,6 +145,14 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('forceStart', (roomCode) => {
+    const room = rooms[roomCode];
+    if (room && room.vipId === socket.id && room.status === 'waiting_players') {
+      room.status = 'racing';
+      io.to(roomCode).emit('raceStart', room.settings);
+    }
+  });
+
   socket.on('disconnect', () => {
     // Check if this was a player in any room
     for (const [roomCode, room] of Object.entries(rooms)) {
