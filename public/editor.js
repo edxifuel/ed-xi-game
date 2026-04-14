@@ -136,11 +136,34 @@ function render() {
   ctx.lineWidth = 80;
   ctx.stroke();
 
+  // Start/Finish Line Render (Only visible if we have enough points)
+  if (sp.length > 5) {
+    ctx.globalAlpha = 1.0;
+    const p0 = sp[0];
+    const p1 = sp[5];
+    const dx = p1.x - p0.x;
+    const dy = p1.y - p0.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist > 0) {
+      const nx = -dy / dist;
+      const ny = dx / dist;
+      ctx.beginPath();
+      ctx.moveTo(p0.x + nx * 40, p0.y + ny * 40);
+      ctx.lineTo(p0.x - nx * 40, p0.y - ny * 40);
+      ctx.strokeStyle = '#FFF';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+  }
+
   // Nodes
   ctx.globalAlpha = 1.0;
-  ctx.fillStyle = '#FF0055';
-  rawPoints.forEach(p => {
-    ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill();
+  rawPoints.forEach((p, index) => {
+    // Make the first coordinate vividly distinct so user knows it's the start line!
+    ctx.fillStyle = index === 0 ? '#00FFDD' : '#FF0055'; 
+    ctx.beginPath(); 
+    ctx.arc(p.x, p.y, index === 0 ? 12 : 8, 0, Math.PI*2); 
+    ctx.fill();
   });
 }
 
