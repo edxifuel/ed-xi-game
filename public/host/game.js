@@ -85,7 +85,13 @@ socket.on('playerInput', (data) => {
 });
 
 socket.on('settingsUpdated', (settings) => {
-  currentSettings = settings;
+  // Only update settings during lobby — never mid-race.
+  // If currentSettings.track changes mid-race, getWaypoints() rebuilds the
+  // spline at different coordinates and causes the two-track overlay bug.
+  if (gameState === 'lobby' || gameState === 'waiting_players') {
+    currentSettings = settings;
+    cachedSplines = {}; // force rebuild at correct canvas size
+  }
 });
 
 socket.on('lobbyStatus', (data) => {
@@ -96,8 +102,9 @@ socket.on('lobbyStatus', (data) => {
 
 socket.on('raceStart', (settings) => {
   currentSettings = settings;
-  gameState = 'racing';
-  document.getElementById('room-info').style.display = 'none'; // Lock in! Hide QR code.
+  cachedSplines = {}; // Ensure fresh spline at current canvas dimensions
+  gameState = 'qualifying';
+  document.getElementById('room-info').style.display = 'none';
   
   const currentCount = Object.keys(players).length;
   const targetCount = parseInt(settings.racers);
@@ -125,9 +132,7 @@ socket.on('raceStart', (settings) => {
     updatePlayerList();
   }
   
-  // Set up Qualifying Rules!
-  // Start the 4 minute timer!
-  gameState = 'qualifying';
+  // Start the 4 minute qualifying timer
   sessionEndsAt = Date.now() + (4 * 60 * 1000); 
   
   // Wipe session stats
