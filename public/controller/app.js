@@ -117,7 +117,10 @@ function sendSettingsUpdate() {
 
 socket.on('waitingForPlayers', (settings) => {
   if (waitScreen.classList.contains('active')) {
-    waitScreen.innerHTML = `<h2>WAITING...</h2><p style="color: #aaa; text-align: center; margin-top: 20px;">WAITING FOR ${settings.racers} RACERS...</p>`;
+    const waitMsg = document.getElementById('wait-msg');
+    if (waitMsg) {
+      waitMsg.innerHTML = `<h2>WAITING...</h2><p style="color: #aaa; text-align: center; margin-top: 20px;">WAITING FOR ${settings.racers} RACERS...</p>`;
+    }
   }
 });
 
