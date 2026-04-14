@@ -892,28 +892,34 @@ function updatePhysics() {
     // Mathematical Map Boundaries (Grass Simulation)
     let currentFriction = FRICTION;
     const trackInfo = getTrackInfo(p.x, p.y, waypoints);
-    if (trackInfo.distance > 42) {
-      // Wall normal: unit vector pointing FROM track center TO kart (outward)
+    // Track boundary zones (match visual layer widths):
+    //   Asphalt edge:  38px from center (lineWidth 76 / 2)
+    //   Kerb edge:     45px from center (lineWidth 90 / 2)
+    //   Hard wall:     54px from center (lineWidth 108 / 2)
+    const KERB_EDGE = 45;
+    const HARD_WALL = 54;
+
+    if (trackInfo.distance > KERB_EDGE) {
+      // Kerb or grass zone — apply friction penalty
+      currentFriction = trackInfo.distance > HARD_WALL ? 0.88 : 0.95;
+    }
+
+    if (trackInfo.distance > HARD_WALL) {
+      // Hard grass wall: snap kart back to grass edge and cancel inward velocity
       const dx = p.x - trackInfo.closestX;
       const dy = p.y - trackInfo.closestY;
       const nx = dx / trackInfo.distance;
       const ny = dy / trackInfo.distance;
 
-      // Snap position back to the track edge
-      p.x = trackInfo.closestX + nx * 42;
-      p.y = trackInfo.closestY + ny * 42;
+      p.x = trackInfo.closestX + nx * HARD_WALL;
+      p.y = trackInfo.closestY + ny * HARD_WALL;
 
-      // Cancel the velocity component pushing INTO the wall (inward normal).
-      // This lets the kart slide tangentially along the edge and steer away cleanly.
+      // Strip only the inward velocity component so kart can slide along wall
       const velDotNormal = p.vx * nx + p.vy * ny;
       if (velDotNormal < 0) {
-        // Only strip inward component (velDotNormal < 0 = moving into wall)
         p.vx -= velDotNormal * nx;
         p.vy -= velDotNormal * ny;
       }
-
-      // Light speed penalty for wall contact
-      currentFriction = 0.92;
     }
 
     // ── Vector Decomposition Physics ──────────────────────────────────────────
