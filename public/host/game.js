@@ -1167,27 +1167,7 @@ function drawTrack() {
   ctx.lineWidth = 96;
   ctx.stroke();
 
-  // Subtle lighter center strip (worn racing line)
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = 'rgba(80,80,80,0.35)';
-  ctx.lineWidth = 36;
-  ctx.stroke();
-
-  // ── Layer 5: Dashed center line ──────────────────────────────────────────
-  ctx.setLineDash([14, 14]);
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // ── Layer 6: Checkered Start/Finish line ─────────────────────────────────
+  // ── Layer 5: Checkered Start/Finish line ─────────────────────────────────
   const p0 = points[0];
   const p1 = points[1];
   const sfDx = p1.x - p0.x, sfDy = p1.y - p0.y;
