@@ -118,7 +118,7 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-const ENGINE_POWER = 0.5;
+const ENGINE_POWER = 0.16;
 const FRICTION = 0.95;
 const TURN_SPEED = 0.08;
 
@@ -199,7 +199,7 @@ function updatePhysics() {
   });
   
   // Floor human speed average slightly to prevent bots dead-stopping
-  const avgSpeed = humanCount > 0 ? Math.max(totalHumanSpeed / humanCount, 2.0) : 5.0; 
+  const avgSpeed = humanCount > 0 ? Math.max(totalHumanSpeed / humanCount, 1.0) : 1.5; 
   const waypoints = getWaypoints();
 
   Object.values(players).forEach(p => {
@@ -226,7 +226,7 @@ function updatePhysics() {
 
       // Rubber banding
       const botSpeed = Math.hypot(p.vx, p.vy);
-      if (botSpeed > avgSpeed + 1) {
+      if (botSpeed > avgSpeed + 0.3) {
         p.gas = 0;
       } else {
         p.gas = 1;
