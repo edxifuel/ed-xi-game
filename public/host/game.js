@@ -180,7 +180,7 @@ function updatePlayerList() {
 // PHYSICS & RENDER LOOP
 const ENGINE_POWER = 0.024;
 const FRICTION = 0.985;
-const TURN_SPEED = 0.055;
+const TURN_SPEED = 0.072;
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
@@ -862,24 +862,15 @@ function updatePhysics() {
 
     if (!p.isBot) {
       // ── Direct Heading Interpolation ─────────────────────────────────────────
-      // Instead of accumulating angular velocity, we lerp directly toward the
-      // target angle driven by the phone tilt. This means the car stops rotating
-      // the instant the player levels the phone — zero rotational inertia.
       const currentSpeed = Math.hypot(p.vx, p.vy);
 
-      // Speed-scaled sensitivity: full authority at low speed, ~30% at top speed
-      // This prevents high-speed spin-outs when the tilt is slammed to one side.
-      const speedSensScale = 1 / (1 + currentSpeed * 0.35);
-      const maxTurnThisFrame = TURN_SPEED * speedSensScale;
-
-      // p.steer is a float in [-1, 1] sent from the phone tilt
-      const targetAngleDelta = p.steer * maxTurnThisFrame;
-
-      // Lerp current angle toward desired heading (smooth but instant-stopping)
-      p.angle += targetAngleDelta * 0.85;
+      // Speed-scaled sensitivity: full authority at low speed, tapers at high speed.
+      // No extra damping multiplier — the speed scale already handles spin-out prevention.
+      const speedSensScale = 1 / (1 + currentSpeed * 0.30);
+      p.angle += p.steer * TURN_SPEED * speedSensScale;
       // ── End Direct Heading ────────────────────────────────────────────────────
     } else {
-      // AI uses old simple accumulation (it doesn't need finesse)
+      // AI uses simple accumulation
       p.angle += p.steer * TURN_SPEED;
     }
 

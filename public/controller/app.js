@@ -247,8 +247,8 @@ function handleOrientation(event) {
     raw = Math.max(-1, Math.min(1, raw));
   }
 
-  // Low-pass filter: smooths sensor jitter without adding lag
-  smoothedSteer = smoothedSteer * 0.5 + raw * 0.5;
+  // Low-pass filter: just enough to kill sensor jitter, not slow the response
+  smoothedSteer = smoothedSteer * 0.25 + raw * 0.75;
   padSteer = smoothedSteer;
 
   // Animate Steering Wheel
