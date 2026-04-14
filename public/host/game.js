@@ -871,9 +871,12 @@ function updatePhysics() {
       }
     }
 
+    // Speed is needed by both steering and lateral grip — compute once here
+    const currentSpeed = Math.hypot(p.vx, p.vy);
+
     if (!p.isBot) {
       // ── Speed-Gated Direct Steering ───────────────────────────────────────
-      const currentSpeed = Math.hypot(p.vx, p.vy);
+      // currentSpeed is declared in the outer scope (vector decomposition section)
 
       // LOW-SPEED RAMP: 0 steering at rest, full at speed ~1.2
       const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
@@ -938,15 +941,11 @@ function updatePhysics() {
     const forwardVel  =  p.vx * cosA + p.vy * sinA;   // +ve = moving forward
     const lateralVel  = -p.vx * sinA + p.vy * cosA;   // +ve = sliding right
 
-    // Speed-dependent grip: faster → more drift allowed (less lateral grip)
-    const currentSpeed = Math.hypot(p.vx, p.vy);
-    
-    // Moderate lateral grip for all players. The Direct Heading Interpolation
-    // system already handles precision steering. Ultra-low grip (0.30) caused
-    // violent velocity snaps on wall contact since it crushes lateralVel in one
-    // frame, which feels like 5x steering amplification after a bounce.
-    const LATERAL_GRIP_BASE = 0.80;  // Good grip at low speed
-    const LATERAL_GRIP_DRIFT = 0.93; // Slight drift at high speed
+    // Lateral grip: keeps kart on its heading without killing speed.
+    // Base 0.94 means minimal sideways slip at low speed.
+    // Drift 0.97 allows a little more slide at top speed.
+    const LATERAL_GRIP_BASE = 0.94;
+    const LATERAL_GRIP_DRIFT = 0.97;
     const driftFactor = Math.min(currentSpeed / 4, 1);
     const lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
 
