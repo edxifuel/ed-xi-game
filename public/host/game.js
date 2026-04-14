@@ -15,6 +15,7 @@ window.addEventListener('resize', () => {
 
 let roomCode = '';
 let players = {};
+let sessionEndsAt = 0;
 
 let gameState = 'lobby';
 let currentSettings = { track: 'cariboo', racers: 2 };
@@ -49,7 +50,11 @@ socket.on('playerJoined', (data) => {
     vy: 0,
     angle: -Math.PI / 2,
     steer: 0,
-    gas: 0
+    gas: 0,
+    targetWaypoint: 0,
+    lapsCompleted: 0,
+    fastestLap: Infinity,
+    lastLapMark: 0
   };
   updatePlayerList();
 });
@@ -98,17 +103,30 @@ socket.on('raceStart', (settings) => {
          vy: 0,
          angle: -Math.PI / 2,
          steer: 0,
-         gas: 0
+         gas: 0,
+         lapsCompleted: 0,
+         fastestLap: Infinity,
+         lastLapMark: 0
        };
      }
     updatePlayerList();
   }
   
-  // Align all karts at start/finish line before race begins
-  alignStartingGrid();
+  // Set up Qualifying Rules!
+  // Start the 4 minute timer!
+  gameState = 'qualifying';
+  sessionEndsAt = Date.now() + (4 * 60 * 1000); 
+  
+  // Wipe session stats
+  Object.values(players).forEach(p => {
+    p.fastestLap = Infinity;
+    p.lastLapMark = Date.now();
+    p.lapsCompleted = 0;
+    p.targetWaypoint = 0;
+  });
 });
 
-function alignStartingGrid() {
+function alignStartingGrid(sortedKeys) {
   const pts = getWaypoints();
   if (pts.length < 2) return;
   const p0 = pts[0];
@@ -126,7 +144,7 @@ function alignStartingGrid() {
   
   const startAngle = Math.atan2(dy, dx);
   
-  const playerKeys = Object.keys(players);
+  const playerKeys = sortedKeys || Object.keys(players);
   for(let i = 0; i < playerKeys.length; i++) {
     const p = players[playerKeys[i]];
     
@@ -791,6 +809,23 @@ function updatePhysics() {
 
   Object.values(players).forEach(p => {
     
+    // Human Lap Tracker
+    if (!p.isBot) {
+      const wp = waypoints[p.targetWaypoint];
+      const distToWp = Math.hypot(wp.x - p.x, wp.y - p.y);
+      if (distToWp < 100) {
+        const nextWp = (p.targetWaypoint + 1) % waypoints.length;
+        // If crossing waypoint 0 AND they have driven most of the track, log a lap!
+        if (nextWp === 0 && p.targetWaypoint > waypoints.length * 0.7) {
+          const lapTime = Date.now() - p.lastLapMark;
+          if (lapTime < p.fastestLap) p.fastestLap = lapTime;
+          p.lapsCompleted++;
+          p.lastLapMark = Date.now();
+        }
+        p.targetWaypoint = nextWp;
+      }
+    }
+
     // AI Processor
     if (p.isBot) {
       const wp = waypoints[p.targetWaypoint];
@@ -985,30 +1020,193 @@ function drawTrack() {
   ctx.stroke();
 }
 
+function formatTime(ms) {
+  if (ms <= 0) return '0:00';
+  const totalSecs = Math.ceil(ms / 1000);
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function formatLapTime(ms) {
+  if (!isFinite(ms) || ms === Infinity) return '--:--.---';
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const ms3 = ms % 1000;
+  return `${m}:${s.toString().padStart(2, '0')}.${ms3.toString().padStart(3, '0')}`;
+}
+
+function drawBroadcastHUD() {
+  const now = Date.now();
+  const remaining = Math.max(0, sessionEndsAt - now);
+  const isQual = gameState === 'qualifying';
+
+  // --- Timer Banner ---
+  const label = isQual ? 'QUALIFYING' : 'RACE';
+  const timerColor = isQual ? '#00ffdd' : '#FF0055';
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = timerColor;
+  ctx.fillStyle = timerColor;
+  ctx.font = '22px "Press Start 2P", monospace';
+  ctx.fillText(label, canvas.width / 2, 36);
+  ctx.font = '48px "Press Start 2P", monospace';
+  ctx.fillText(formatTime(remaining), canvas.width / 2, 85);
+  ctx.restore();
+
+  // --- Live Leaderboard ---
+  const sorted = Object.entries(players)
+    .filter(([, p]) => !p.isBot)
+    .sort(([, a], [, b]) => {
+      if (a.fastestLap === Infinity && b.fastestLap === Infinity) return 0;
+      if (a.fastestLap === Infinity) return 1;
+      if (b.fastestLap === Infinity) return -1;
+      return a.fastestLap - b.fastestLap;
+    });
+
+  const boxW = 260, boxH = 30;
+  const lx = 20, ly = 20;
+  sorted.forEach(([, p], i) => {
+    const bx = lx;
+    const by = ly + i * (boxH + 6);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.roundRect(bx, by, boxW, boxH, 6);
+    ctx.fill();
+    ctx.fillStyle = p.color;
+    ctx.font = '11px "Press Start 2P", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`P${i+1} ${p.name.slice(0,8)}`, bx + 8, by + 20);
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'right';
+    ctx.fillText(formatLapTime(p.fastestLap), bx + boxW - 8, by + 20);
+    ctx.restore();
+  });
+}
+
+function doGridTransition() {
+  // Sort human players fastest-to-slowest, append bots
+  const humans = Object.entries(players).filter(([, p]) => !p.isBot);
+  const bots = Object.entries(players).filter(([, p]) => p.isBot);
+  humans.sort(([, a], [, b]) => {
+    if (a.fastestLap === Infinity && b.fastestLap === Infinity) return 0;
+    if (a.fastestLap === Infinity) return 1;
+    if (b.fastestLap === Infinity) return -1;
+    return a.fastestLap - b.fastestLap;
+  });
+  const sortedKeys = [...humans.map(([k]) => k), ...bots.map(([k]) => k)];
+  // Freeze velocities
+  Object.values(players).forEach(p => { p.vx = 0; p.vy = 0; p.gas = 0; p.steer = 0; });
+  alignStartingGrid(sortedKeys);
+  // Reset lap timers for the race
+  Object.values(players).forEach(p => {
+    p.fastestLap = Infinity;
+    p.lapsCompleted = 0;
+    p.lastLapMark = Date.now();
+    p.targetWaypoint = 0;
+  });
+}
+
+function drawGridWaitScreen() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.font = '30px "Press Start 2P", monospace';
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#FF0055';
+  ctx.fillStyle = '#FF0055';
+  ctx.fillText('QUALIFYING COMPLETE!', canvas.width / 2, canvas.height / 2 - 40);
+  ctx.font = '20px "Press Start 2P", monospace';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('GRID LOCKED • RACE STARTING SOON', canvas.width / 2, canvas.height / 2 + 10);
+  ctx.restore();
+}
+
+function drawPostRaceScreen() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  const sorted = Object.entries(players)
+    .sort(([, a], [, b]) => {
+      if (a.fastestLap === Infinity && b.fastestLap === Infinity) return 0;
+      if (a.fastestLap === Infinity) return 1;
+      if (b.fastestLap === Infinity) return -1;
+      return a.fastestLap - b.fastestLap;
+    });
+
+  ctx.font = '30px "Press Start 2P", monospace';
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#FFFF00';
+  ctx.fillStyle = '#FFFF00';
+  ctx.fillText('RACE OVER!', canvas.width / 2, 70);
+  ctx.shadowBlur = 0;
+
+  sorted.forEach(([, p], i) => {
+    const y = 130 + i * 45;
+    ctx.font = '18px "Press Start 2P", monospace';
+    ctx.fillStyle = p.color;
+    ctx.textAlign = 'left';
+    ctx.fillText(`P${i+1} ${p.name}`, canvas.width / 2 - 200, y);
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'right';
+    ctx.fillText(`BEST: ${formatLapTime(p.fastestLap)}`, canvas.width / 2 + 200, y);
+  });
+  ctx.restore();
+}
+
+let gridTransitionDone = false;
+
 function loop() {
   ctx.fillStyle = 'rgba(5, 5, 16, 0.4)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
+
   drawGrid();
   drawTrack();
-  
-  if (gameState === 'racing') {
+
+  const now = Date.now();
+
+  if (gameState === 'qualifying') {
     updatePhysics();
-    
+    drawBroadcastHUD();
+
+    if (now >= sessionEndsAt) {
+      gameState = 'grid_walk';
+      gridTransitionDone = false;
+      doGridTransition();
+      // After 5 seconds, begin the race
+      setTimeout(() => {
+        gameState = 'racing';
+        sessionEndsAt = Date.now() + (8 * 60 * 1000);
+      }, 5000);
+    }
+
+  } else if (gameState === 'grid_walk') {
+    drawGridWaitScreen();
+
+  } else if (gameState === 'racing') {
+    updatePhysics();
+    drawBroadcastHUD();
+
     // Broadcast Speed Telemetry
     const speedsDist = {};
     Object.keys(players).forEach(id => {
       if (!players[id].isBot) {
-        // Double the displayed visual speed
         let v = Math.hypot(players[id].vx, players[id].vy);
-        speedsDist[id] = Math.round(v * 52); 
+        speedsDist[id] = Math.round(v * 52);
       }
     });
     if (Object.keys(speedsDist).length > 0) {
       socket.emit('hostTelemetry', speedsDist);
     }
+
+    if (now >= sessionEndsAt) {
+      gameState = 'post_race';
+    }
+
+  } else if (gameState === 'post_race') {
+    drawPostRaceScreen();
+
   } else {
-    // Draw Lobby Notification
+    // Lobby / Waiting
     ctx.fillStyle = '#fff';
     ctx.font = '24px "Press Start 2P", Courier, monospace';
     ctx.textAlign = 'center';
@@ -1017,9 +1215,10 @@ function loop() {
     ctx.fillText(lobbyText, canvas.width/2, canvas.height - 40);
     ctx.shadowBlur = 0;
   }
-  
+
   drawCars();
   requestAnimationFrame(loop);
 }
+
 
 loop();
