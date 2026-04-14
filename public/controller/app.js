@@ -3,6 +3,8 @@ const socket = io();
 const joinScreen = document.getElementById('join-screen');
 const gamepadScreen = document.getElementById('gamepad-screen');
 const roomCodeInput = document.getElementById('room-code-input');
+const roomCodeWrapper = document.getElementById('room-code-wrapper');
+const driverNameInput = document.getElementById('driver-name-input');
 const joinBtn = document.getElementById('join-btn');
 const errorMsg = document.getElementById('error-msg');
 const playerColorBox = document.getElementById('player-color-box');
@@ -23,20 +25,34 @@ let isConnected = false;
 let padSteer = 0;
 let padGas = 0;
 
-// Auto-fill code from URL if present
+// Load Driver Name from LocalStorage
+const savedName = localStorage.getItem('edxi_driver_name');
+if (savedName) {
+  driverNameInput.value = savedName;
+}
+
+// Check for direct-join URL
 const urlParams = new URLSearchParams(window.location.search);
 const codeParam = urlParams.get('code');
 if (codeParam) {
-  roomCodeInput.value = codeParam.toUpperCase();
+  currentRoomCode = codeParam.toUpperCase();
+  roomCodeWrapper.style.display = 'none';
 }
 
 // JOIN LOGIC
 joinBtn.addEventListener('click', async () => {
-  const code = roomCodeInput.value.toUpperCase();
-  if (code.length !== 4) {
-    errorMsg.innerText = 'ENTER 4 LETTER CODE';
-    return;
+  let code = currentRoomCode;
+  
+  if (!code) {
+    code = roomCodeInput.value.toUpperCase();
+    if (code.length !== 4) {
+      errorMsg.innerText = 'ENTER 4 LETTER CODE';
+      return;
+    }
   }
+
+  const driverName = driverNameInput.value.trim().toUpperCase() || 'RACER';
+  localStorage.setItem('edxi_driver_name', driverName);
 
   // Request Device Orientation Permissions (iOS 13+ requirement)
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -52,8 +68,8 @@ joinBtn.addEventListener('click', async () => {
     }
   }
 
-  // Once permission is granted, request join via socket
-  socket.emit('controllerJoin', code);
+  // Send the payload to join
+  socket.emit('controllerJoin', { code: code, name: driverName });
   currentRoomCode = code;
 });
 

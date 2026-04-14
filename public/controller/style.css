@@ -76,7 +76,7 @@ body {
   color: #aaa;
 }
 
-#room-code-input {
+#room-code-input, #driver-name-input {
   width: 100%;
   background: rgba(0,0,0,0.5);
   border: 2px solid var(--neon-blue);
@@ -91,7 +91,7 @@ body {
   box-shadow: inset 0 0 10px rgba(0, 255, 221, 0.2);
 }
 
-#room-code-input:focus {
+#room-code-input:focus, #driver-name-input:focus {
   box-shadow: inset 0 0 15px rgba(0, 255, 221, 0.5), 0 0 15px rgba(0, 255, 221, 0.5);
 }
 

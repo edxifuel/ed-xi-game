@@ -42,6 +42,7 @@ socket.on('playerJoined', (data) => {
   // Spawn player near center
   players[data.id] = {
     color: data.color,
+    name: data.name || 'RACER',
     x: canvas.width / 2 + (Math.random() * 100 - 50),
     y: canvas.height / 2 + (Math.random() * 100 - 50),
     vx: 0,
@@ -88,7 +89,7 @@ function updatePlayerList() {
     el.className = 'player-token';
     el.style.borderColor = p.color;
     el.style.color = p.color;
-    el.innerHTML = `<div class="color-box" style="background-color: ${p.color};"></div> PLYR ${idx + 1}`;
+    el.innerHTML = `<div class="color-box" style="background-color: ${p.color};"></div> ${p.name}`;
     playerList.appendChild(el);
   });
 }
@@ -191,6 +192,15 @@ function drawCars() {
     }
 
     ctx.restore();
+
+    // Draw non-rotating driver nametag above kart
+    ctx.fillStyle = p.color;
+    ctx.font = '10px "Press Start 2P", Courier, monospace';
+    ctx.textAlign = 'center';
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = p.color;
+    ctx.fillText(p.name, p.x, p.y - 25);
+    ctx.shadowBlur = 0;
   });
 }
 

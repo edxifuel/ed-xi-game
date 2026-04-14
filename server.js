@@ -46,8 +46,10 @@ io.on('connection', (socket) => {
     console.log(`Host created room ${roomCode}`);
   });
 
-  socket.on('controllerJoin', (roomCode) => {
-    roomCode = roomCode.toUpperCase();
+  socket.on('controllerJoin', (payload) => {
+    const roomCode = (typeof payload === 'string' ? payload : payload.code).toUpperCase();
+    const driverName = (typeof payload === 'string' ? 'RACER' : payload.name);
+
     if (rooms[roomCode]) {
       const room = rooms[roomCode];
       
@@ -63,7 +65,7 @@ io.on('connection', (socket) => {
       socket.join(roomCode);
       const color = PLAYER_COLORS[playerCount];
       
-      room.players[socket.id] = { color: color, isVip: isVip };
+      room.players[socket.id] = { color: color, isVip: isVip, name: driverName };
       
       socket.emit('joinSuccess', { color: color, isVip: isVip });
       
@@ -71,7 +73,8 @@ io.on('connection', (socket) => {
       io.to(room.hostId).emit('playerJoined', {
         id: socket.id,
         color: color,
-        isVip: isVip
+        isVip: isVip,
+        name: driverName
       });
 
       // Update TV Lobby status if waiting for players
