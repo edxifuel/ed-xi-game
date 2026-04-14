@@ -964,55 +964,108 @@ function drawCars() {
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(p.angle);
-    
-    ctx.strokeStyle = p.color;
-    ctx.shadowBlur = 15;
+
+    // ── Glow aura ─────────────────────────────────────────────────────────────
+    ctx.shadowBlur = 18;
     ctx.shadowColor = p.color;
-    ctx.fillStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = 3;
-    
+
+    // ── Four Wheels ──────────────────────────────────────────────────────────
+    // Wheels are drawn first so body renders on top
+    ctx.fillStyle = '#222';
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 1.5;
+    const wheels = [
+      { x:  12, y: -11 }, // front-right
+      { x:  12, y:  11 }, // front-left
+      { x: -12, y: -11 }, // rear-right
+      { x: -12, y:  11 }, // rear-left
+    ];
+    wheels.forEach(w => {
+      ctx.beginPath();
+      ctx.roundRect(w.x - 5, w.y - 3, 10, 6, 1);
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    // ── Kart Body ─────────────────────────────────────────────────────────────
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = 0.25;
     ctx.beginPath();
-    ctx.moveTo(20, 0);       
-    ctx.lineTo(-15, -12);    
-    ctx.lineTo(-10, 0);      
-    ctx.lineTo(-15, 12);     
+    ctx.roundRect(-16, -9, 32, 18, 4);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
+    // Body outline
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-16, -9, 32, 18, 4);
+    ctx.stroke();
+
+    // Nose cone (forward triangular point)
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(16, -6);
+    ctx.lineTo(24, 0);
+    ctx.lineTo(16,  6);
     ctx.closePath();
+    ctx.fill();
+
+    // ── Cockpit / Helmet ─────────────────────────────────────────────────────
+    ctx.fillStyle = '#111';
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 7, 5, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    // Gas flames
-    if (p.gas === 1) {
-      ctx.beginPath();
-      ctx.moveTo(-10, 0);
-      ctx.lineTo(-20 - Math.random() * 15, 0);
-      ctx.strokeStyle = '#00FFDD'; 
-      ctx.lineWidth = 3;
-      ctx.shadowColor = '#00FFDD';
-      ctx.stroke();
+    // ── Headlights ───────────────────────────────────────────────────────────
+    ctx.fillStyle = '#ffffaa';
+    ctx.shadowColor = '#ffffaa';
+    ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(18, -5, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(18,  5, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = p.color;
+
+    // ── Brake Lights ─────────────────────────────────────────────────────────
+    if (p.gas === -1) {
+      ctx.fillStyle = '#ff2222';
+      ctx.shadowColor = '#ff2222';
+      ctx.shadowBlur = 20;
+      ctx.beginPath(); ctx.arc(-17, -6, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-17,  6, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = p.color;
     }
 
-    // Brake lights
-    if (p.gas === -1) {
-      ctx.fillStyle = '#FF0055';
-      ctx.shadowColor = '#FF0055';
+    // ── Exhaust Thrust ────────────────────────────────────────────────────────
+    if (p.gas === 1) {
+      ctx.strokeStyle = '#ff7700';
+      ctx.shadowColor = '#ff7700';
       ctx.shadowBlur = 15;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.arc(-14, -10, 4, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(-16, -3);
+      ctx.lineTo(-16 - 8 - Math.random() * 10, -3 + (Math.random() - 0.5) * 4);
+      ctx.stroke();
       ctx.beginPath();
-      ctx.arc(-14, 10, 4, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(-16,  3);
+      ctx.lineTo(-16 - 8 - Math.random() * 10,  3 + (Math.random() - 0.5) * 4);
+      ctx.stroke();
     }
 
     ctx.restore();
 
-    // Draw non-rotating driver nametag above kart
+    // Non-rotating driver nametag above kart
     ctx.fillStyle = p.color;
     ctx.font = '10px "Press Start 2P", Courier, monospace';
     ctx.textAlign = 'center';
     ctx.shadowBlur = 5;
     ctx.shadowColor = p.color;
-    ctx.fillText(p.name, p.x, p.y - 25);
+    ctx.fillText(p.name, p.x, p.y - 28);
     ctx.shadowBlur = 0;
   });
 }
