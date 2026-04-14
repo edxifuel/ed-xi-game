@@ -896,16 +896,27 @@ function updatePhysics() {
     let currentFriction = FRICTION;
     const trackInfo = getTrackInfo(p.x, p.y, waypoints);
     if (trackInfo.distance > 42) {
-      // Physical Barrier! Push kart perfectly back to the edge of the grass!
+      // Wall normal: unit vector pointing FROM track center TO kart (outward)
       const dx = p.x - trackInfo.closestX;
       const dy = p.y - trackInfo.closestY;
       const nx = dx / trackInfo.distance;
       const ny = dy / trackInfo.distance;
+
+      // Snap position back to the track edge
       p.x = trackInfo.closestX + nx * 42;
       p.y = trackInfo.closestY + ny * 42;
-      
-      // Light friction penalty for wall-riding
-      currentFriction = 0.94; 
+
+      // Cancel the velocity component pushing INTO the wall (inward normal).
+      // This lets the kart slide tangentially along the edge and steer away cleanly.
+      const velDotNormal = p.vx * nx + p.vy * ny;
+      if (velDotNormal < 0) {
+        // Only strip inward component (velDotNormal < 0 = moving into wall)
+        p.vx -= velDotNormal * nx;
+        p.vy -= velDotNormal * ny;
+      }
+
+      // Light speed penalty for wall contact
+      currentFriction = 0.92;
     }
 
     // ── Vector Decomposition Physics ──────────────────────────────────────────
