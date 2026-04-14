@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
       status: 'lobby',
       vipId: null,
       settings: {
-        track: 'kartplex',
+        track: 'vika_long',
         racers: 2
       }
     };
