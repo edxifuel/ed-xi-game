@@ -399,8 +399,8 @@ function updatePhysics() {
     const lateralVel  = -p.vx * sinA + p.vy * cosA;   // +ve = sliding right
 
     // Speed-dependent grip: faster → more drift allowed (less lateral grip)
-    const speed = Math.hypot(p.vx, p.vy);
-    const driftFactor = Math.min(speed / 4, 1);   // 0 at rest → 1 at full speed
+    const currentSpeed = Math.hypot(p.vx, p.vy);
+    const driftFactor = Math.min(currentSpeed / 4, 1);   // 0 at rest → 1 at full speed
     const LATERAL_GRIP_BASE = 0.78;               // Strong base grip
     const LATERAL_GRIP_DRIFT = 0.92;              // Loose grip at high speed
     const lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
