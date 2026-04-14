@@ -18,7 +18,7 @@ let players = {};
 let sessionEndsAt = 0;
 
 let gameState = 'lobby';
-let currentSettings = { track: 'cariboo', racers: 2 };
+let currentSettings = { track: 'vika_short', racers: 2 };
 let lobbyText = "VIP IS SELECTING TRACK RULES";
 
 socket.emit('hostCreate');
@@ -892,11 +892,11 @@ function updatePhysics() {
     let currentFriction = FRICTION;
     const trackInfo = getTrackInfo(p.x, p.y, waypoints);
     // Track boundary zones (match visual layer widths):
-    //   Asphalt edge:  38px from center (lineWidth 76 / 2)
-    //   Kerb edge:     45px from center (lineWidth 90 / 2)
-    //   Hard wall:     54px from center (lineWidth 108 / 2)
-    const KERB_EDGE = 45;
-    const HARD_WALL = 54;
+    //   Asphalt edge:  48px from center (lineWidth 96 / 2)
+    //   Kerb edge:     56px from center (lineWidth 112 / 2)
+    //   Hard wall:     65px from center (lineWidth 130 / 2)
+    const KERB_EDGE = 48;
+    const HARD_WALL = 65;
 
     if (trackInfo.distance > KERB_EDGE) {
       // Kerb or grass zone — apply friction penalty
@@ -1096,7 +1096,7 @@ function drawTrack() {
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
   ctx.strokeStyle = '#1a3d16';
-  ctx.lineWidth = 116;
+  ctx.lineWidth = 140;
   ctx.stroke();
 
   // ── Layer 2: Brighter grass shoulder ─────────────────────────────────────
@@ -1105,7 +1105,7 @@ function drawTrack() {
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
   ctx.strokeStyle = '#2d5a27';
-  ctx.lineWidth = 108;
+  ctx.lineWidth = 130;
   ctx.stroke();
 
   // ── Layer 3: Kerb stripe band (red/white alternating) ────────────────────
@@ -1116,7 +1116,7 @@ function drawTrack() {
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 90;
+  ctx.lineWidth = 112;
   ctx.stroke();
 
   // Red stripes: iterate segment by segment, paint every other ~16px segment red
@@ -1139,7 +1139,7 @@ function drawTrack() {
         ctx.moveTo(sx + (ex - sx) * t0, sy + (ey - sy) * t0);
         ctx.lineTo(sx + (ex - sx) * t1, sy + (ey - sy) * t1);
         ctx.strokeStyle = '#cc1111';
-        ctx.lineWidth = 90;
+        ctx.lineWidth = 112;
         ctx.lineCap = 'butt';
         ctx.stroke();
         ctx.lineCap = 'round';
@@ -1156,7 +1156,7 @@ function drawTrack() {
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
   ctx.strokeStyle = '#3a3a3a';
-  ctx.lineWidth = 76;
+  ctx.lineWidth = 96;
   ctx.stroke();
 
   // Subtle lighter center strip (worn racing line)
@@ -1165,7 +1165,7 @@ function drawTrack() {
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
   ctx.strokeStyle = 'rgba(80,80,80,0.35)';
-  ctx.lineWidth = 28;
+  ctx.lineWidth = 36;
   ctx.stroke();
 
   // ── Layer 5: Dashed center line ──────────────────────────────────────────
