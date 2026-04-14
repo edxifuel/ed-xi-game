@@ -45,6 +45,8 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
+  padding: 40px 0;
 }
 
 .screen.active {

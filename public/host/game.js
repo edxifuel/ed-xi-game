@@ -80,6 +80,29 @@ socket.on('raceStart', (settings) => {
   currentSettings = settings;
   gameState = 'racing';
   document.getElementById('room-info').style.display = 'none'; // Lock in! Hide QR code.
+  
+  const currentCount = Object.keys(players).length;
+  const targetCount = parseInt(settings.racers);
+  if (currentCount < targetCount) {
+    const aiColors = ['#FF00FF', '#00FF00', '#FFA500', '#FFFFFF', '#FF0055'];
+    for(let i = 0; i < (targetCount - currentCount); i++) {
+       const botId = 'BOT_' + i;
+       players[botId] = {
+         color: aiColors[i % aiColors.length],
+         name: 'CPU-' + (i+1),
+         isBot: true,
+         targetWaypoint: 0,
+         x: canvas.width / 2 + (Math.random() * 100 - 50),
+         y: canvas.height / 2 + (Math.random() * 100 - 50),
+         vx: 0,
+         vy: 0,
+         angle: -Math.PI / 2,
+         steer: 0,
+         gas: 0
+       };
+    }
+    updatePlayerList();
+  }
 });
 
 function updatePlayerList() {
@@ -117,8 +140,80 @@ function drawGrid() {
   ctx.stroke();
 }
 
+function getWaypoints() {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  
+  if (currentSettings.track === 'neon_ring') {
+    const rx = canvas.width * 0.3;
+    const ry = canvas.height * 0.3;
+    return [
+      {x: cx, y: cy - ry},
+      {x: cx + rx * 0.7, y: cy - ry * 0.7}, 
+      {x: cx + rx, y: cy},
+      {x: cx + rx * 0.7, y: cy + ry * 0.7},
+      {x: cx, y: cy + ry},
+      {x: cx - rx * 0.7, y: cy + ry * 0.7},
+      {x: cx - rx, y: cy},
+      {x: cx - rx * 0.7, y: cy - ry * 0.7}
+    ];
+  } else {
+    // cyber square uses 20% / 80% boundaries
+    return [
+      {x: canvas.width * 0.2, y: canvas.height * 0.2},
+      {x: canvas.width * 0.8, y: canvas.height * 0.2},
+      {x: canvas.width * 0.8, y: canvas.height * 0.8},
+      {x: canvas.width * 0.2, y: canvas.height * 0.8}
+    ];
+  }
+}
+
 function updatePhysics() {
+  let totalHumanSpeed = 0;
+  let humanCount = 0;
+  
   Object.values(players).forEach(p => {
+    if (!p.isBot) {
+      humanCount++;
+      totalHumanSpeed += Math.hypot(p.vx, p.vy);
+    }
+  });
+  
+  // Floor human speed average slightly to prevent bots dead-stopping
+  const avgSpeed = humanCount > 0 ? Math.max(totalHumanSpeed / humanCount, 2.0) : 5.0; 
+  const waypoints = getWaypoints();
+
+  Object.values(players).forEach(p => {
+    
+    // AI Processor
+    if (p.isBot) {
+      const wp = waypoints[p.targetWaypoint];
+      const dx = wp.x - p.x;
+      const dy = wp.y - p.y;
+      const dist = Math.hypot(dx, dy);
+      
+      if (dist < 120) {
+        p.targetWaypoint = (p.targetWaypoint + 1) % waypoints.length;
+      }
+      
+      let targetAngle = Math.atan2(dy, dx);
+      let diff = targetAngle - p.angle;
+      while (diff <= -Math.PI) diff += Math.PI * 2;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      
+      if (diff > 0.15) p.steer = 1;
+      else if (diff < -0.15) p.steer = -1;
+      else p.steer = 0;
+
+      // Rubber banding
+      const botSpeed = Math.hypot(p.vx, p.vy);
+      if (botSpeed > avgSpeed + 1) {
+        p.gas = 0;
+      } else {
+        p.gas = 1;
+      }
+    }
+
     const speed = Math.hypot(p.vx, p.vy);
     const speedFactor = Math.min(speed / 2, 1); 
 
