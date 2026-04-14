@@ -1072,41 +1072,123 @@ function drawTrack() {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-  // Grass Outline
+  // ── Layer 1: Dark grass base ──────────────────────────────────────────────
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
-  for(let i=1; i<points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y);
-  }
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
-  ctx.strokeStyle = '#2d5a27'; // Dark green grass
-  ctx.lineWidth = 110;
+  ctx.strokeStyle = '#1a3d16';
+  ctx.lineWidth = 116;
   ctx.stroke();
 
-  // Asphalt Core
+  // ── Layer 2: Brighter grass shoulder ─────────────────────────────────────
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
-  for(let i=1; i<points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y);
-  }
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
-  ctx.strokeStyle = '#333333'; // Asphalt gray
-  ctx.lineWidth = 80;
+  ctx.strokeStyle = '#2d5a27';
+  ctx.lineWidth = 108;
   ctx.stroke();
 
-  // Draw start/finish line spanning asphalt width
-  const dx = points[1].x - points[0].x;
-  const dy = points[1].y - points[0].y;
-  const dist = Math.hypot(dx, dy);
-  const nx = -dy / dist;
-  const ny = dx / dist;
-
+  // ── Layer 3: Kerb stripe band (red/white alternating) ────────────────────
+  // Drawn as a solid band first (white), then red stripes on top.
+  // Width 88 → sits between grass (108) and asphalt (76)
   ctx.beginPath();
-  ctx.moveTo(points[0].x + nx * 40, points[0].y + ny * 40);
-  ctx.lineTo(points[0].x - nx * 40, points[0].y - ny * 40);
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.closePath();
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 5;
+  ctx.lineWidth = 90;
   ctx.stroke();
+
+  // Red stripes: iterate segment by segment, paint every other ~16px segment red
+  const STRIPE_LEN = 16;
+  let accum = 0;
+  let stripeToggle = 0;
+  for (let i = 0; i < points.length; i++) {
+    const next = (i + 1) % points.length;
+    const sx = points[i].x, sy = points[i].y;
+    const ex = points[next].x, ey = points[next].y;
+    const segLen = Math.hypot(ex - sx, ey - sy);
+    let walked = 0;
+    while (walked < segLen) {
+      const remaining = STRIPE_LEN - accum;
+      const step = Math.min(remaining, segLen - walked);
+      const t0 = walked / segLen;
+      const t1 = (walked + step) / segLen;
+      if (stripeToggle % 2 === 0) {
+        ctx.beginPath();
+        ctx.moveTo(sx + (ex - sx) * t0, sy + (ey - sy) * t0);
+        ctx.lineTo(sx + (ex - sx) * t1, sy + (ey - sy) * t1);
+        ctx.strokeStyle = '#cc1111';
+        ctx.lineWidth = 90;
+        ctx.lineCap = 'butt';
+        ctx.stroke();
+        ctx.lineCap = 'round';
+      }
+      accum += step;
+      walked += step;
+      if (accum >= STRIPE_LEN) { accum = 0; stripeToggle++; }
+    }
+  }
+
+  // ── Layer 4: Asphalt core ────────────────────────────────────────────────
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.closePath();
+  ctx.strokeStyle = '#3a3a3a';
+  ctx.lineWidth = 76;
+  ctx.stroke();
+
+  // Subtle lighter center strip (worn racing line)
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(80,80,80,0.35)';
+  ctx.lineWidth = 28;
+  ctx.stroke();
+
+  // ── Layer 5: Dashed center line ──────────────────────────────────────────
+  ctx.setLineDash([14, 14]);
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── Layer 6: Checkered Start/Finish line ─────────────────────────────────
+  const p0 = points[0];
+  const p1 = points[1];
+  const sfDx = p1.x - p0.x, sfDy = p1.y - p0.y;
+  const sfDist = Math.hypot(sfDx, sfDy);
+  const sfNx = -sfDy / sfDist, sfNy = sfDx / sfDist; // perpendicular
+  const sfFx =  sfDx / sfDist, sfFy = sfDy / sfDist; // forward
+
+  const BOX = 10; // checker square size
+  const BOXES = 8; // boxes across the track width
+  const half = (BOXES / 2) * BOX;
+
+  ctx.shadowBlur = 0;
+  for (let col = 0; col < BOXES; col++) {
+    for (let row = 0; row < 2; row++) {
+      const isWhite = (col + row) % 2 === 0;
+      const offN = (col - BOXES / 2) * BOX + BOX / 2;
+      const offF = (row - 1) * BOX + BOX / 2;
+      const cx = p0.x + sfNx * offN + sfFx * offF;
+      const cy = p0.y + sfNy * offN + sfFy * offF;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.atan2(sfDy, sfDx));
+      ctx.fillStyle = isWhite ? '#ffffff' : '#111111';
+      ctx.fillRect(-BOX / 2, -BOX / 2, BOX, BOX);
+      ctx.restore();
+    }
+  }
 }
 
 function formatTime(ms) {
