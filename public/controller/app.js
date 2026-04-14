@@ -146,6 +146,13 @@ socket.on('hostDisconnected', () => {
   }, 2000);
 });
 
+socket.on('telemetry', (speed) => {
+  const speedEl = document.getElementById('speed-val');
+  if (speedEl) {
+    speedEl.innerText = speed.toString().padStart(3, '0');
+  }
+});
+
 // INPUT CAPTURE
 
 // Gas Pedal

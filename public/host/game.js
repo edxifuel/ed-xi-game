@@ -996,6 +996,19 @@ function loop() {
   
   if (gameState === 'racing') {
     updatePhysics();
+    
+    // Broadcast Speed Telemetry
+    const speedsDist = {};
+    Object.keys(players).forEach(id => {
+      if (!players[id].isBot) {
+        // Convert velocity magnitude to KM/H equivalent (approx 120kmh flat out)
+        let v = Math.hypot(players[id].vx, players[id].vy);
+        speedsDist[id] = Math.round(v * 26); 
+      }
+    });
+    if (Object.keys(speedsDist).length > 0) {
+      socket.emit('hostTelemetry', speedsDist);
+    }
   } else {
     // Draw Lobby Notification
     ctx.fillStyle = '#fff';

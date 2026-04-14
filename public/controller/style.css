@@ -150,7 +150,38 @@ select:focus {
 
 /* GAMEPAD STYLES */
 #gamepad-screen {
-  background: radial-gradient(circle at center, #111, #000);
+  background: url('assets/kart_chassis.png') center bottom / cover no-repeat;
+}
+
+#speedometer-container {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+  z-index: 10;
+}
+
+#speed-val {
+  font-family: 'Outfit', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.speed-unit {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: #00ffdd;
 }
 
 .status-bar {
@@ -259,25 +290,25 @@ select:focus {
 }
 
 .brake-pedal.active {
-  border-color: var(--neon-pink);
-  background: rgba(255, 0, 85, 0.2);
-  box-shadow: 0 0 20px rgba(255,0,85, 0.5);
+  border-color: #ff2222;
+  background: rgba(255, 34, 34, 0.3);
+  box-shadow: 0 0 30px rgba(255, 34, 34, 0.8);
 }
 
 .brake-pedal.active .pedal-label {
   opacity: 1;
-  color: var(--neon-pink);
+  color: #ff2222;
 }
 
 .gas-pedal.active {
-  border-color: var(--neon-blue);
-  background: rgba(0, 255, 221, 0.2);
-  box-shadow: 0 0 20px rgba(0,255,221, 0.5);
+  border-color: #ff7700;
+  background: rgba(255, 119, 0, 0.3);
+  box-shadow: 0 0 30px rgba(255, 119, 0, 0.8);
 }
 
 .gas-pedal.active .pedal-label {
   opacity: 1;
-  color: var(--neon-blue);
+  color: #ff7700;
 }
 
 .steering-column {
@@ -290,7 +321,8 @@ select:focus {
 
 #steering-wheel {
   width: 100%;
-  max-width: 200px;
-  filter: drop-shadow(0 0 10px rgba(0, 255, 221, 0.5));
+  max-width: 350px;
+  mix-blend-mode: multiply; /* Make white background transparent */
   transition: transform 0.05s linear; /* smooth out gyro jitter */
+  transform-origin: center center;
 }

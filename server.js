@@ -116,6 +116,12 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('hostTelemetry', (speedsDist) => {
+    Object.keys(speedsDist).forEach(playerId => {
+      io.to(playerId).emit('telemetry', speedsDist[playerId]);
+    });
+  });
+
   socket.on('updateSettings', (data) => {
     const room = rooms[data.roomCode];
     if (room && room.vipId === socket.id && room.status === 'lobby') {

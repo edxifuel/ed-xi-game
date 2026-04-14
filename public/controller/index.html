@@ -82,6 +82,10 @@
       <div id="connection-status">CONNECTED</div>
     </div>
     
+    <div id="speedometer-container">
+      <span id="speed-val">000</span><span class="speed-unit">KM/H</span>
+    </div>
+
     <div class="instruction">
       <p>TILT L/R TO STEER</p>
       <p>HOLD ANYWHERE FOR GAS</p>
@@ -94,17 +98,7 @@
       </div>
       
       <div class="steering-column">
-        <svg id="steering-wheel" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <!-- Wheel Grips -->
-          <path d="M 15 30 A 45 45 0 0 0 15 70" fill="none" stroke="var(--neon-blue)" stroke-width="12" stroke-linecap="round"/>
-          <path d="M 85 30 A 45 45 0 0 1 85 70" fill="none" stroke="var(--neon-blue)" stroke-width="12" stroke-linecap="round"/>
-          <!-- Metal Crossbar -->
-          <rect x="15" y="42" width="70" height="16" fill="var(--neon-blue)" rx="2"/>
-          <!-- Center Hub -->
-          <circle cx="50" cy="50" r="16" fill="#000" stroke="var(--neon-pink)" stroke-width="4"/>
-          <!-- ED-XI logo inside hub -->
-          <text x="50" y="52" fill="white" font-family="'Press Start 2P', cursive" font-size="6" text-anchor="middle" dominant-baseline="middle">XI</text>
-        </svg>
+        <img id="steering-wheel" src="assets/f1_wheel.png" alt="F1 Wheel">
       </div>
 
       <div class="pedal gas-pedal" id="gas-pedal">
