@@ -65,7 +65,7 @@ socket.on('playerLeft', (id) => {
 });
 
 socket.on('playerInput', (data) => {
-  if (players[data.id] && gameState === 'racing') {
+  if (players[data.id] && (gameState === 'racing' || gameState === 'qualifying')) {
     players[data.id].steer = data.steer;
     players[data.id].gas = data.gas;
   }
