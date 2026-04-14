@@ -17,7 +17,7 @@ let roomCode = '';
 let players = {};
 
 let gameState = 'lobby';
-let currentSettings = { track: 'neon_ring', racers: 2 };
+let currentSettings = { track: 'west_coast', racers: 2 };
 let lobbyText = "VIP IS SELECTING TRACK RULES";
 
 socket.emit('hostCreate');
@@ -168,6 +168,25 @@ function getWaypoints() {
   }
 }
 
+function distToSegmentSquared(p, v, w) {
+  const l2 = (w.x - v.x) ** 2 + (w.y - v.y) ** 2;
+  if (l2 === 0) return (p.x - v.x) ** 2 + (p.y - v.y) ** 2;
+  let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return (p.x - (v.x + t * (w.x - v.x))) ** 2 + (p.y - (v.y + t * (w.y - v.y))) ** 2;
+}
+
+function getDistToTrack(x, y, waypoints) {
+  let minDistSq = Infinity;
+  for(let i=0; i<waypoints.length; i++) {
+    const v = waypoints[i];
+    const w = waypoints[(i+1) % waypoints.length];
+    const distSq = distToSegmentSquared({x, y}, v, w);
+    if (distSq < minDistSq) minDistSq = distSq;
+  }
+  return Math.sqrt(minDistSq);
+}
+
 function updatePhysics() {
   let totalHumanSpeed = 0;
   let humanCount = 0;
@@ -228,8 +247,15 @@ function updatePhysics() {
       p.vy -= Math.sin(p.angle) * (ENGINE_POWER * 0.7);
     }
 
-    p.vx *= FRICTION;
-    p.vy *= FRICTION;
+    // Mathematical Map Boundaries (Grass Simulation)
+    let currentFriction = FRICTION;
+    const distFromCenter = getDistToTrack(p.x, p.y, waypoints);
+    if (distFromCenter > 40) {
+      currentFriction = 0.85; // 50% max speed penalty on grass
+    }
+
+    p.vx *= currentFriction;
+    p.vy *= currentFriction;
     
     p.x += p.vx;
     p.y += p.vy;
@@ -300,29 +326,47 @@ function drawCars() {
 }
 
 function drawTrack() {
-  ctx.lineWidth = 4;
-  ctx.shadowBlur = 10;
-  
-  if (currentSettings.track === 'neon_ring') {
-    ctx.strokeStyle = 'rgba(0, 255, 221, 0.4)';
-    ctx.shadowColor = '#00FFDD';
-    
-    ctx.beginPath();
-    ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.4, canvas.height * 0.4, 0, 0, Math.PI * 2);
-    ctx.stroke();
+  const points = getWaypoints();
+  if (!points || points.length === 0) return;
 
-    ctx.beginPath();
-    ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.2, canvas.height * 0.2, 0, 0, Math.PI * 2);
-    ctx.stroke();
-  } else if (currentSettings.track === 'cyber_square') {
-    ctx.strokeStyle = 'rgba(255, 0, 85, 0.4)';
-    ctx.shadowColor = '#FF0055';
-    
-    ctx.strokeRect(canvas.width * 0.1, canvas.height * 0.1, canvas.width * 0.8, canvas.height * 0.8);
-    ctx.strokeRect(canvas.width * 0.3, canvas.height * 0.3, canvas.width * 0.4, canvas.height * 0.4);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Grass Outline
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for(let i=1; i<points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
   }
-  
-  ctx.shadowBlur = 0;
+  ctx.closePath();
+  ctx.strokeStyle = '#2d5a27'; // Dark green grass
+  ctx.lineWidth = 110;
+  ctx.stroke();
+
+  // Asphalt Core
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for(let i=1; i<points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = '#333333'; // Asphalt gray
+  ctx.lineWidth = 80;
+  ctx.stroke();
+
+  // Draw start/finish line spanning asphalt width
+  const dx = points[1].x - points[0].x;
+  const dy = points[1].y - points[0].y;
+  const dist = Math.hypot(dx, dy);
+  const nx = -dy / dist;
+  const ny = dx / dist;
+
+  ctx.beginPath();
+  ctx.moveTo(points[0].x + nx * 40, points[0].y + ny * 40);
+  ctx.lineTo(points[0].x - nx * 40, points[0].y - ny * 40);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 5;
+  ctx.stroke();
 }
 
 function loop() {
