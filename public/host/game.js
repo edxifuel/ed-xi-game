@@ -1146,16 +1146,7 @@ function drawTrack() {
   ctx.lineJoin = 'round';
   ctx.setLineDash([]);
 
-  // ── Layer 1: Dark grass base ──────────────────────────────────────────────
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = '#1a3d16';
-  ctx.lineWidth = 140;
-  ctx.stroke();
-
-  // ── Layer 2: Brighter grass shoulder ─────────────────────────────────────
+  // ── Grass ─────────────────────────────────────────────────────────────────
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
@@ -1164,49 +1155,7 @@ function drawTrack() {
   ctx.lineWidth = 130;
   ctx.stroke();
 
-  // ── Layer 3: Kerb stripe band (red/white alternating) ────────────────────
-  // Drawn as a solid band first (white), then red stripes on top.
-  // Width 88 → sits between grass (108) and asphalt (76)
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.closePath();
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 112;
-  ctx.stroke();
-
-  // Red stripes: iterate segment by segment, paint every other ~16px segment red
-  const STRIPE_LEN = 16;
-  let accum = 0;
-  let stripeToggle = 0;
-  for (let i = 0; i < points.length; i++) {
-    const next = (i + 1) % points.length;
-    const sx = points[i].x, sy = points[i].y;
-    const ex = points[next].x, ey = points[next].y;
-    const segLen = Math.hypot(ex - sx, ey - sy);
-    let walked = 0;
-    while (walked < segLen) {
-      const remaining = STRIPE_LEN - accum;
-      const step = Math.min(remaining, segLen - walked);
-      const t0 = walked / segLen;
-      const t1 = (walked + step) / segLen;
-      if (stripeToggle % 2 === 0) {
-        ctx.beginPath();
-        ctx.moveTo(sx + (ex - sx) * t0, sy + (ey - sy) * t0);
-        ctx.lineTo(sx + (ex - sx) * t1, sy + (ey - sy) * t1);
-        ctx.strokeStyle = '#cc1111';
-        ctx.lineWidth = 112;
-        ctx.lineCap = 'butt';
-        ctx.stroke();
-        ctx.lineCap = 'round';
-      }
-      accum += step;
-      walked += step;
-      if (accum >= STRIPE_LEN) { accum = 0; stripeToggle++; }
-    }
-  }
-
-  // ── Layer 4: Asphalt core ────────────────────────────────────────────────
+  // ── Asphalt ───────────────────────────────────────────────────────────────
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
@@ -1214,6 +1163,7 @@ function drawTrack() {
   ctx.strokeStyle = '#3a3a3a';
   ctx.lineWidth = 96;
   ctx.stroke();
+
 
   // ── Layer 5: Checkered Start/Finish line ─────────────────────────────────
   const p0 = points[0];
