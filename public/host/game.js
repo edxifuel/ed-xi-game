@@ -140,14 +140,58 @@ function drawGrid() {
   ctx.stroke();
 }
 
+function catmullRom(p0, p1, p2, p3, t) {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return 0.5 * (
+      (2 * p1) +
+      (-p0 + p2) * t +
+      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+      (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+  );
+}
+
+function generateSpline(points, resolution = 10) {
+  if (points.length < 3) return points;
+  const spline = [];
+  
+  // Close the loop mathematically for perfect continuous curves
+  const pts = [...points];
+  pts.unshift(points[points.length - 1]);
+  pts.push(points[0]);
+  pts.push(points[1]);
+
+  for (let i = 1; i < pts.length - 2; i++) {
+    for (let j = 0; j < resolution; j++) {
+      const t = j / resolution;
+      spline.push({
+        x: catmullRom(pts[i - 1].x, pts[i].x, pts[i + 1].x, pts[i + 2].x, t),
+        y: catmullRom(pts[i - 1].y, pts[i].y, pts[i + 1].y, pts[i + 2].y, t)
+      });
+    }
+  }
+  return spline;
+}
+
+let cachedSplines = {};
+let lastCanvasSize = { w: 0, h: 0 };
+
 function getWaypoints() {
   const w = canvas.width;
   const h = canvas.height;
   const cx = w / 2;
   const cy = h / 2;
+
+  // Cache resolution to prevent calculating Math 60 frames a second
+  if (lastCanvasSize.w === w && lastCanvasSize.h === h && cachedSplines[currentSettings.track]) {
+     return cachedSplines[currentSettings.track];
+  }
+  
+  lastCanvasSize = { w, h };
+  let rawPoints = [];
   
   if (currentSettings.track === 'cariboo') {
-    return [
+    rawPoints = [
       {x: w * 0.3,  y: h * 0.85},
       {x: w * 0.75, y: h * 0.85},
       {x: w * 0.9,  y: h * 0.75},
@@ -167,7 +211,7 @@ function getWaypoints() {
       {x: w * 0.2,  y: h * 0.85}
     ];
   } else if (currentSettings.track === 'west_coast') {
-    return [
+    rawPoints = [
       {x: w * 0.8, y: h * 0.85},
       {x: w * 0.2, y: h * 0.85},
       {x: w * 0.1, y: h * 0.75},
@@ -191,7 +235,7 @@ function getWaypoints() {
   } else if (currentSettings.track === 'neon_ring') {
     const rx = w * 0.3;
     const ry = h * 0.3;
-    return [
+    rawPoints = [
       {x: cx, y: cy - ry},
       {x: cx + rx * 0.7, y: cy - ry * 0.7}, 
       {x: cx + rx, y: cy},
@@ -203,13 +247,23 @@ function getWaypoints() {
     ];
   } else {
     // cyber square uses 20% / 80% boundaries
-    return [
+    rawPoints = [
       {x: w * 0.2, y: h * 0.2},
       {x: w * 0.8, y: h * 0.2},
       {x: w * 0.8, y: h * 0.8},
       {x: w * 0.2, y: h * 0.8}
     ];
   }
+
+  // Neon ring is already an octagon and circular enough, but we can spline it.
+  // Cyber square is a literal square, so we shouldn't spline it.
+  if (currentSettings.track === 'cyber_square') {
+    cachedSplines[currentSettings.track] = rawPoints;
+  } else {
+    cachedSplines[currentSettings.track] = generateSpline(rawPoints, 12);
+  }
+  
+  return cachedSplines[currentSettings.track];
 }
 
 function distToSegmentSquared(p, v, w) {
