@@ -1334,7 +1334,7 @@ function drawPostRaceScreen() {
 let gridTransitionDone = false;
 
 function loop() {
-  ctx.fillStyle = 'rgba(5, 5, 16, 0.4)';
+  ctx.fillStyle = '#050510';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawGrid();
