@@ -5,23 +5,21 @@ const playerList = document.getElementById('player-list');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Use clientWidth (excludes scrollbar) so player-list DOM reflows never
-// change the canvas size and rescale the track mid-session.
-const docEl = document.documentElement;
-canvas.width  = docEl.clientWidth;
-canvas.height = docEl.clientHeight;
+// Use window.innerWidth/innerHeight for rock-solid full screen.
+// We debounce the resize so scrollbar flickers during lobby don't cause track rebuilds.
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    const newW = docEl.clientWidth;
-    const newH = docEl.clientHeight;
-    // Only resize for genuine window resizes (>30px), not scrollbar flicker
+    const newW = window.innerWidth;
+    const newH = window.innerHeight;
     if (Math.abs(newW - canvas.width) > 30 || Math.abs(newH - canvas.height) > 30) {
       canvas.width  = newW;
       canvas.height = newH;
-      cachedSplines = {};
+      cachedSplines = {}; // Force track rebuild
     }
   }, 200);
 });
