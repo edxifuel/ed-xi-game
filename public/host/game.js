@@ -1075,16 +1075,16 @@ function drawTrack() {
   const points = getWaypoints();
   if (!points || points.length === 0) return;
 
-  // Raw waypoints only needed for the start/finish line position.
-  const rawPoints = (() => {
-    const w = canvas.width, h = canvas.height;
-    // Pull the same raw array used by getWaypoints so S/F is at the right spot.
-    // We only need points[0] and points[1] for the S/F line direction.
-    return points; // splined points are dense enough — point[0] is still near start
-  })();
-
+  // Completely isolate track canvas state from kart/HUD rendering.
+  // Without this, dirty globalAlpha, shadowBlur, lineWidth from kart drawing
+  // bleeds into track stroke calls and causes visual corruption with 2+ karts.
+  ctx.save();
+  ctx.globalAlpha = 1.0;
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = 'transparent';
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+  ctx.setLineDash([]);
 
   // ── Layer 1: Dark grass base ──────────────────────────────────────────────
   ctx.beginPath();
@@ -1203,6 +1203,7 @@ function drawTrack() {
       ctx.restore();
     }
   }
+  ctx.restore(); // End of drawTrack canvas state isolation
 }
 
 function formatTime(ms) {
