@@ -16,6 +16,10 @@ window.addEventListener('resize', () => {
 let roomCode = '';
 let players = {};
 
+let gameState = 'lobby';
+let currentSettings = { track: 'neon_ring', racers: 2 };
+let lobbyText = "VIP IS SELECTING TRACK RULES";
+
 socket.emit('hostCreate');
 
 socket.on('roomCreated', (code) => {
@@ -35,7 +39,7 @@ socket.on('roomCreated', (code) => {
 });
 
 socket.on('playerJoined', (data) => {
-  document.getElementById('room-info').style.display = 'none';
+  // Spawn player near center
   players[data.id] = {
     color: data.color,
     x: canvas.width / 2 + (Math.random() * 100 - 50),
@@ -52,16 +56,29 @@ socket.on('playerJoined', (data) => {
 socket.on('playerLeft', (id) => {
   delete players[id];
   updatePlayerList();
-  if (Object.keys(players).length === 0) {
-    document.getElementById('room-info').style.display = 'block';
-  }
 });
 
 socket.on('playerInput', (data) => {
-  if (players[data.id]) {
+  if (players[data.id] && gameState === 'racing') {
     players[data.id].steer = data.steer;
     players[data.id].gas = data.gas;
   }
+});
+
+socket.on('settingsUpdated', (settings) => {
+  currentSettings = settings;
+});
+
+socket.on('lobbyStatus', (data) => {
+  gameState = 'waiting_players';
+  const remaining = data.target - data.current;
+  lobbyText = remaining > 0 ? `WAITING FOR ${remaining} RACER(S) TO SCAN IN` : 'READY TO START';
+});
+
+socket.on('raceStart', (settings) => {
+  currentSettings = settings;
+  gameState = 'racing';
+  document.getElementById('room-info').style.display = 'none'; // Lock in! Hide QR code.
 });
 
 function updatePlayerList() {
@@ -178,20 +195,27 @@ function drawCars() {
 }
 
 function drawTrack() {
-  ctx.strokeStyle = 'rgba(0, 255, 221, 0.4)';
   ctx.lineWidth = 4;
   ctx.shadowBlur = 10;
-  ctx.shadowColor = '#00FFDD';
   
-  // Outer Boundary
-  ctx.beginPath();
-  ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.4, canvas.height * 0.4, 0, 0, Math.PI * 2);
-  ctx.stroke();
+  if (currentSettings.track === 'neon_ring') {
+    ctx.strokeStyle = 'rgba(0, 255, 221, 0.4)';
+    ctx.shadowColor = '#00FFDD';
+    
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.4, canvas.height * 0.4, 0, 0, Math.PI * 2);
+    ctx.stroke();
 
-  // Inner Boundary
-  ctx.beginPath();
-  ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.2, canvas.height * 0.2, 0, 0, Math.PI * 2);
-  ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.2, canvas.height * 0.2, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (currentSettings.track === 'cyber_square') {
+    ctx.strokeStyle = 'rgba(255, 0, 85, 0.4)';
+    ctx.shadowColor = '#FF0055';
+    
+    ctx.strokeRect(canvas.width * 0.1, canvas.height * 0.1, canvas.width * 0.8, canvas.height * 0.8);
+    ctx.strokeRect(canvas.width * 0.3, canvas.height * 0.3, canvas.width * 0.4, canvas.height * 0.4);
+  }
   
   ctx.shadowBlur = 0;
 }
@@ -202,9 +226,21 @@ function loop() {
   
   drawGrid();
   drawTrack();
-  updatePhysics();
+  
+  if (gameState === 'racing') {
+    updatePhysics();
+  } else {
+    // Draw Lobby Notification
+    ctx.fillStyle = '#fff';
+    ctx.font = '24px "Press Start 2P", Courier, monospace';
+    ctx.textAlign = 'center';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#fff';
+    ctx.fillText(lobbyText, canvas.width/2, canvas.height - 40);
+    ctx.shadowBlur = 0;
+  }
+  
   drawCars();
-
   requestAnimationFrame(loop);
 }
 

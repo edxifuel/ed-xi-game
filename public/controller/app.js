@@ -9,7 +9,11 @@ const playerColorBox = document.getElementById('player-color-box');
 const connectionStatus = document.getElementById('connection-status');
 const gasPedal = document.getElementById('gas-pedal');
 const brakePedal = document.getElementById('brake-pedal');
-const connectionStatus = document.getElementById('connection-status');
+const vipScreen = document.getElementById('vip-screen');
+const waitScreen = document.getElementById('wait-screen');
+const trackSelect = document.getElementById('track-select');
+const racerSelect = document.getElementById('racer-select');
+const confirmBtn = document.getElementById('confirm-btn');
 
 let currentRoomCode = '';
 let myColor = '';
@@ -53,23 +57,53 @@ joinBtn.addEventListener('click', async () => {
   currentRoomCode = code;
 });
 
-socket.on('joinSuccess', (color) => {
+socket.on('joinSuccess', (data) => {
   isConnected = true;
-  myColor = color;
+  myColor = data.color;
   
   // Transition UI
   joinScreen.classList.remove('active');
+  playerColorBox.style.color = myColor;
+  playerColorBox.style.backgroundColor = myColor;
+  playerColorBox.style.boxShadow = `0 0 15px ${myColor}`;
+
+  if (data.isVip) {
+    vipScreen.classList.add('active');
+    
+    trackSelect.addEventListener('change', sendSettingsUpdate);
+    racerSelect.addEventListener('change', sendSettingsUpdate);
+    
+    confirmBtn.addEventListener('click', () => {
+      socket.emit('confirmSettings', currentRoomCode);
+      vipScreen.classList.remove('active');
+      waitScreen.classList.add('active');
+    });
+  } else {
+    waitScreen.classList.add('active');
+  }
+});
+
+function sendSettingsUpdate() {
+  socket.emit('updateSettings', {
+    roomCode: currentRoomCode,
+    track: trackSelect.value,
+    racers: racerSelect.value
+  });
+}
+
+socket.on('waitingForPlayers', (settings) => {
+  if (waitScreen.classList.contains('active')) {
+    waitScreen.innerHTML = `<h2>WAITING...</h2><p style="color: #aaa; text-align: center; margin-top: 20px;">WAITING FOR ${settings.racers} RACERS...</p>`;
+  }
+});
+
+socket.on('raceStart', (settings) => {
+  vipScreen.classList.remove('active');
+  waitScreen.classList.remove('active');
   gamepadScreen.classList.add('active');
   
-  playerColorBox.style.color = color;
-  playerColorBox.style.backgroundColor = color;
-  playerColorBox.style.boxShadow = `0 0 15px ${color}`;
-
-  // Start reading sensors
   window.addEventListener('deviceorientation', handleOrientation);
-  
-  // Start Input Loop
-  setInterval(sendInput, 1000 / 20); // 20 FPS updates
+  setInterval(sendInput, 1000 / 20); 
 });
 
 socket.on('joinError', (msg) => {

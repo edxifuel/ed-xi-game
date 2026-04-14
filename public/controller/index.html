@@ -31,6 +31,37 @@
     <div id="error-msg"></div>
   </div>
 
+  <!-- VIP SCREEN -->
+  <div id="vip-screen" class="screen">
+    <div class="grid-overlay"></div>
+    <h1>VIP SETTINGS</h1>
+    <div class="input-group">
+      <label>SELECT TRACK</label>
+      <select id="track-select">
+        <option value="neon_ring">NEON RING</option>
+        <option value="cyber_square">CYBER SQUARE</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>TOTAL RACERS</label>
+      <select id="racer-select">
+        <option value="2">2 RACERS</option>
+        <option value="3">3 RACERS</option>
+        <option value="4">4 RACERS</option>
+        <option value="5">5 RACERS</option>
+        <option value="8">8 RACERS</option>
+      </select>
+    </div>
+    <button id="confirm-btn" class="btn btn-pink">CONFIRM RULES</button>
+  </div>
+
+  <!-- WAIT SCREEN -->
+  <div id="wait-screen" class="screen">
+    <div class="grid-overlay"></div>
+    <h2>WAITING...</h2>
+    <p style="color: #aaa; text-align: center; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; line-height: 1.5; margin-top: 20px;">The VIP is configuring the race.</p>
+  </div>
+
   <!-- GAMEPAD SCREEN -->
   <div id="gamepad-screen" class="screen">
     <div class="status-bar">

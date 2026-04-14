@@ -33,7 +33,13 @@ io.on('connection', (socket) => {
     
     rooms[roomCode] = {
       hostId: socket.id,
-      players: {}
+      players: {},
+      status: 'lobby',
+      vipId: null,
+      settings: {
+        track: 'neon_ring',
+        racers: 2
+      }
     };
 
     socket.emit('roomCreated', roomCode);
@@ -51,18 +57,36 @@ io.on('connection', (socket) => {
         return;
       }
 
+      const isVip = (playerCount === 0);
+      if (isVip) room.vipId = socket.id;
+
       socket.join(roomCode);
       const color = PLAYER_COLORS[playerCount];
       
-      room.players[socket.id] = { color: color };
+      room.players[socket.id] = { color: color, isVip: isVip };
       
-      socket.emit('joinSuccess', color);
+      socket.emit('joinSuccess', { color: color, isVip: isVip });
       
       // Notify host that a player joined
       io.to(room.hostId).emit('playerJoined', {
         id: socket.id,
-        color: color
+        color: color,
+        isVip: isVip
       });
+
+      // Update TV Lobby status if waiting for players
+      if (room.status === 'waiting_players') {
+        io.to(room.hostId).emit('lobbyStatus', {
+           target: room.settings.racers, 
+           current: Object.keys(room.players).length 
+        });
+      }
+
+      // Start the race if rules are met
+      if (room.status === 'waiting_players' && Object.keys(room.players).length === room.settings.racers) {
+        room.status = 'racing';
+        io.to(roomCode).emit('raceStart', room.settings);
+      }
 
       console.log(`Controller joined room ${roomCode} as ${color}`);
     } else {
@@ -89,6 +113,35 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('updateSettings', (data) => {
+    const room = rooms[data.roomCode];
+    if (room && room.vipId === socket.id && room.status === 'lobby') {
+      room.settings.track = data.track;
+      room.settings.racers = parseInt(data.racers, 10);
+      io.to(room.hostId).emit('settingsUpdated', room.settings);
+    }
+  });
+
+  socket.on('confirmSettings', (roomCode) => {
+    const room = rooms[roomCode];
+    if (room && room.vipId === socket.id && room.status === 'lobby') {
+      room.status = 'waiting_players';
+      
+      io.to(room.hostId).emit('lobbyStatus', {
+         target: room.settings.racers, 
+         current: Object.keys(room.players).length 
+      });
+      
+      // Attempt auto-start if quota is already met
+      if (Object.keys(room.players).length === room.settings.racers) {
+        room.status = 'racing';
+        io.to(roomCode).emit('raceStart', room.settings);
+      } else {
+        io.to(roomCode).emit('waitingForPlayers', room.settings);
+      }
+    }
+  });
+
   socket.on('disconnect', () => {
     // Check if this was a player in any room
     for (const [roomCode, room] of Object.entries(rooms)) {
@@ -99,6 +152,10 @@ io.on('connection', (socket) => {
       } else if (room.players[socket.id]) {
         // Player disconnected
         delete room.players[socket.id];
+        
+        // Ensure VIP migration is not needed right now (for simplicity, if VIP leaves, room crashes or we just let it be)
+        if (room.vipId === socket.id) room.vipId = null;
+
         io.to(room.hostId).emit('playerLeft', socket.id);
       }
     }
