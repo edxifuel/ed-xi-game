@@ -820,10 +820,8 @@ function updatePhysics() {
       }
     }
 
-    const speed = Math.hypot(p.vx, p.vy);
-    const speedFactor = Math.min(speed / 2, 1); 
-
-    p.angle += p.steer * TURN_SPEED * speedFactor;
+    // Allow full steering authority even when completely stopped
+    p.angle += p.steer * TURN_SPEED;
 
     if (p.gas === 1) {
       p.vx += Math.cos(p.angle) * ENGINE_POWER;
@@ -846,8 +844,8 @@ function updatePhysics() {
       p.x = trackInfo.closestX + nx * 42;
       p.y = trackInfo.closestY + ny * 42;
       
-      // Absorb some speed into the wall so it acts like a soft foam barrier
-      currentFriction = 0.85; 
+      // Light friction penalty for wall-riding
+      currentFriction = 0.94; 
     }
 
     // ── Vector Decomposition Physics ──────────────────────────────────────────
