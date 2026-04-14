@@ -208,34 +208,57 @@ brakePedal.addEventListener('mouseup', (e) => {
 });
 
 // Tilt for Steering
+let steerOffset = 0;       // calibration zero-point (set on first touch)
+let calibrated = false;
+let smoothedSteer = 0;     // low-pass filtered steer value
+
 function handleOrientation(event) {
   if (!isConnected) return;
-  
-  let tilt = 0;
-  const orientation = (screen.orientation || {}).type || window.orientation || 0;
-  
-  // In landscape, left/right steering is measured around the Beta axis
-  if (orientation === 90 || orientation === 'landscape-primary') {
-    tilt = event.beta;
-  } else if (orientation === -90 || orientation === 'landscape-secondary') {
-    tilt = -event.beta;
-  } else {
-    // Portrait fallback
-    tilt = event.gamma; 
-  }
-  
-  // Clamp tilt
-  if (tilt > 45) tilt = 45;
-  if (tilt < -45) tilt = -45;
-  
-  padSteer = tilt / 45;
 
-  // Animate SVG Steering Wheel
+  // gamma = left/right tilt of the phone = correct axis for steering in landscape
+  // It ranges -90 (full left) to +90 (full right).
+  // landscape-secondary (upside-down landscape) flips the sign.
+  let rawGamma = event.gamma ?? 0;
+
+  const orientType = (screen.orientation || {}).type || '';
+  if (orientType === 'landscape-secondary') {
+    rawGamma = -rawGamma;
+  }
+
+  // Auto-calibrate on first reading so the kart goes straight at the player's
+  // natural resting hold angle.
+  if (!calibrated) {
+    steerOffset = rawGamma;
+    calibrated = true;
+  }
+
+  const tilt = rawGamma - steerOffset;
+
+  // Dead zone: ignore tiny wobble within ±4 degrees
+  const DEAD_ZONE = 4;
+  const STEER_RANGE = 35; // degrees of tilt for full lock
+
+  let raw = 0;
+  if (Math.abs(tilt) > DEAD_ZONE) {
+    raw = (tilt - Math.sign(tilt) * DEAD_ZONE) / STEER_RANGE;
+    raw = Math.max(-1, Math.min(1, raw)); // clamp to [-1, 1]
+  }
+
+  // Low-pass filter: smooths jitter without adding lag
+  smoothedSteer = smoothedSteer * 0.6 + raw * 0.4;
+  padSteer = smoothedSteer;
+
+  // Animate Steering Wheel
   const wheel = document.getElementById('steering-wheel');
   if (wheel) {
-    wheel.style.transform = `rotate(${padSteer * 90}deg)`;
+    wheel.style.transform = `rotate(${padSteer * 120}deg)`;
   }
 }
+
+// Re-calibrate when the player taps the screen to set neutral
+document.addEventListener('touchstart', () => {
+  calibrated = false;
+}, { once: false, passive: true });
 
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
