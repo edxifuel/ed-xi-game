@@ -17,7 +17,7 @@ let roomCode = '';
 let players = {};
 
 let gameState = 'lobby';
-let currentSettings = { track: 'west_coast', racers: 2 };
+let currentSettings = { track: 'cariboo', racers: 2 };
 let lobbyText = "VIP IS SELECTING TRACK RULES";
 
 socket.emit('hostCreate');
@@ -146,7 +146,27 @@ function getWaypoints() {
   const cx = w / 2;
   const cy = h / 2;
   
-  if (currentSettings.track === 'west_coast') {
+  if (currentSettings.track === 'cariboo') {
+    return [
+      {x: w * 0.3,  y: h * 0.85},
+      {x: w * 0.75, y: h * 0.85},
+      {x: w * 0.9,  y: h * 0.75},
+      {x: w * 0.95, y: h * 0.45},
+      {x: w * 0.85, y: h * 0.15},
+      {x: w * 0.6,  y: h * 0.1},
+      {x: w * 0.25, y: h * 0.1},
+      {x: w * 0.1,  y: h * 0.2},
+      {x: w * 0.2,  y: h * 0.35},
+      {x: w * 0.5,  y: h * 0.4},
+      {x: w * 0.7,  y: h * 0.45},
+      {x: w * 0.8,  y: h * 0.55},
+      {x: w * 0.65, y: h * 0.65},
+      {x: w * 0.3,  y: h * 0.65},
+      {x: w * 0.15, y: h * 0.65},
+      {x: w * 0.1,  y: h * 0.75},
+      {x: w * 0.2,  y: h * 0.85}
+    ];
+  } else if (currentSettings.track === 'west_coast') {
     return [
       {x: w * 0.8, y: h * 0.85},
       {x: w * 0.2, y: h * 0.85},
