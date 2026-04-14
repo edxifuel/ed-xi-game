@@ -931,10 +931,12 @@ function updatePhysics() {
     // Speed-dependent grip: faster → more drift allowed (less lateral grip)
     const currentSpeed = Math.hypot(p.vx, p.vy);
     
-    // Aggressive grip for humans — near-zero lateral slip at all speeds.
-    // Players need precise cornering, not arcade drift physics.
-    const LATERAL_GRIP_BASE = p.isBot ? 0.78 : 0.30;  // Humans grip HARD
-    const LATERAL_GRIP_DRIFT = p.isBot ? 0.92 : 0.55; // Even at speed, minimal slide
+    // Moderate lateral grip for all players. The Direct Heading Interpolation
+    // system already handles precision steering. Ultra-low grip (0.30) caused
+    // violent velocity snaps on wall contact since it crushes lateralVel in one
+    // frame, which feels like 5x steering amplification after a bounce.
+    const LATERAL_GRIP_BASE = 0.80;  // Good grip at low speed
+    const LATERAL_GRIP_DRIFT = 0.93; // Slight drift at high speed
     const driftFactor = Math.min(currentSpeed / 4, 1);
     const lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
 
