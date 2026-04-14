@@ -891,20 +891,13 @@ function updatePhysics() {
     // Mathematical Map Boundaries (Grass Simulation)
     let currentFriction = FRICTION;
     const trackInfo = getTrackInfo(p.x, p.y, waypoints);
-    // Track boundary zones (match visual layer widths):
-    //   Asphalt edge:  48px from center (lineWidth 96 / 2)
-    //   Kerb edge:     56px from center (lineWidth 112 / 2)
-    //   Hard wall:     65px from center (lineWidth 130 / 2)
-    const KERB_EDGE = 48;
-    const HARD_WALL = 65;
-
-    if (trackInfo.distance > KERB_EDGE) {
-      // Kerb or grass zone — apply friction penalty
-      currentFriction = trackInfo.distance > HARD_WALL ? 0.88 : 0.95;
-    }
+    // Track boundary — single hard wall at the grass edge.
+    // Asphalt half-width = 48px (lineWidth 96). Kerbs extend to 56px.
+    // Grass hard wall = 68px. No kerb friction zone — kerbs are purely visual.
+    const HARD_WALL = 68;
 
     if (trackInfo.distance > HARD_WALL) {
-      // Hard grass wall: snap kart back to grass edge and cancel inward velocity
+      // Clamp position back to grass edge
       const dx = p.x - trackInfo.closestX;
       const dy = p.y - trackInfo.closestY;
       const nx = dx / trackInfo.distance;
@@ -913,12 +906,15 @@ function updatePhysics() {
       p.x = trackInfo.closestX + nx * HARD_WALL;
       p.y = trackInfo.closestY + ny * HARD_WALL;
 
-      // Strip only the inward velocity component so kart can slide along wall
+      // Strip inward velocity component so kart slides along wall cleanly
       const velDotNormal = p.vx * nx + p.vy * ny;
       if (velDotNormal < 0) {
         p.vx -= velDotNormal * nx;
         p.vy -= velDotNormal * ny;
       }
+
+      // Speed penalty only when actually in the grass
+      currentFriction = 0.90;
     }
 
     // ── Vector Decomposition Physics ──────────────────────────────────────────
