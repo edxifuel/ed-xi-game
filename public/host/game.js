@@ -8,9 +8,21 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let resizeTimer = null;
 window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // Debounce: ignore rapid reflows (e.g. scrollbar appearing when DOM changes).
+  // Only resize if dimensions change by more than 10px to avoid player-list
+  // DOM reflows causing the track to rescale mid-session.
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const newW = window.innerWidth;
+    const newH = window.innerHeight;
+    if (Math.abs(newW - canvas.width) > 10 || Math.abs(newH - canvas.height) > 10) {
+      canvas.width = newW;
+      canvas.height = newH;
+      cachedSplines = {}; // Force track spline rebuild at new dimensions
+    }
+  }, 150);
 });
 
 let roomCode = '';
