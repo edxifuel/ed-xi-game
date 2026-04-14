@@ -861,14 +861,18 @@ function updatePhysics() {
     }
 
     if (!p.isBot) {
-      // ── Direct Heading Interpolation ─────────────────────────────────────────
+      // ── Speed-Gated Direct Steering ───────────────────────────────────────
       const currentSpeed = Math.hypot(p.vx, p.vy);
 
-      // Speed-scaled sensitivity: full authority at low speed, tapers at high speed.
-      // No extra damping multiplier — the speed scale already handles spin-out prevention.
-      const speedSensScale = 1 / (1 + currentSpeed * 0.30);
-      p.angle += p.steer * TURN_SPEED * speedSensScale;
-      // ── End Direct Heading ────────────────────────────────────────────────────
+      // LOW-SPEED RAMP: steering authority is 0 at rest and ramps to 1.0
+      // at speed ~1.2. This prevents spinning in place.
+      const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
+
+      // HIGH-SPEED REDUCTION: prevents spin-outs at top speed.
+      const highSpeedFactor = 1 / (1 + currentSpeed * 0.25);
+
+      p.angle += p.steer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+      // ── End Steering ──────────────────────────────────────────────────────
     } else {
       // AI uses simple accumulation
       p.angle += p.steer * TURN_SPEED;
