@@ -5,24 +5,25 @@ const playerList = document.getElementById('player-list');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// Use clientWidth (excludes scrollbar) so player-list DOM reflows never
+// change the canvas size and rescale the track mid-session.
+const docEl = document.documentElement;
+canvas.width  = docEl.clientWidth;
+canvas.height = docEl.clientHeight;
 
 let resizeTimer = null;
 window.addEventListener('resize', () => {
-  // Debounce: ignore rapid reflows (e.g. scrollbar appearing when DOM changes).
-  // Only resize if dimensions change by more than 10px to avoid player-list
-  // DOM reflows causing the track to rescale mid-session.
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    const newW = window.innerWidth;
-    const newH = window.innerHeight;
-    if (Math.abs(newW - canvas.width) > 10 || Math.abs(newH - canvas.height) > 10) {
-      canvas.width = newW;
+    const newW = docEl.clientWidth;
+    const newH = docEl.clientHeight;
+    // Only resize for genuine window resizes (>30px), not scrollbar flicker
+    if (Math.abs(newW - canvas.width) > 30 || Math.abs(newH - canvas.height) > 30) {
+      canvas.width  = newW;
       canvas.height = newH;
-      cachedSplines = {}; // Force track spline rebuild at new dimensions
+      cachedSplines = {};
     }
-  }, 150);
+  }, 200);
 });
 
 let roomCode = '';
