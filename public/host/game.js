@@ -1393,6 +1393,16 @@ function loop() {
   }
 
   drawCars();
+
+  // DEBUG: show canvas dimensions and cache state on screen
+  const cacheKey = `${currentSettings.track}_${canvas.width}_${canvas.height}`;
+  ctx.fillStyle = 'rgba(255,255,0,0.9)';
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'left';
+  ctx.shadowBlur = 0;
+  ctx.fillText(`canvas: ${canvas.width}x${canvas.height}  players: ${Object.keys(players).length}  track: ${currentSettings.track}`, 8, canvas.height - 8);
+  ctx.fillText(`cacheKeys: ${Object.keys(cachedSplines).join(' | ')}`, 8, canvas.height - 22);
+
   requestAnimationFrame(loop);
 }
 
