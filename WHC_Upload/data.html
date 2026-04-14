@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED-XI | Technical Specifications</title>
+
+    <meta name="description" content="Official Product Data Sheet for ED-XI Performance Fuels. Ingredient specifications, pH levels, and regulatory compliance data.">
+    <meta name="robots" content="index, follow">
+
+    <style>
+        /* --- RESET & BASICS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #080808; color: #ffffff; line-height: 1.6; }
+        
+        :root { --neon-orange: #FF6B00; --neon-blue: #0055FF; --text-gray: #b0b0b0; }
+
+        /* --- NAV --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(0, 0, 0, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .logo { display: flex; align-items: center; }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon-orange); }
+
+        /* --- DATA SHEET CONTAINER --- */
+        .pds-wrapper { padding: 120px 5% 60px 5%; background: #080808; min-height: 100vh; }
+        .pds-container { 
+            max-width: 1000px; margin: 0 auto; 
+            background: #111; border: 1px solid #333; 
+            padding: 50px; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); 
+            position: relative;
+        }
+        /* Top "Paper Clip" visual accent */
+        .pds-container::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 150px; height: 4px; background: var(--neon-orange);
+        }
+
+        .pds-header-block { border-bottom: 2px solid #333; margin-bottom: 30px; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; }
+        .pds-title { font-family: 'Courier New', monospace; color: white; font-size: 1.8rem; font-weight: bold; }
+        .pds-sub { font-family: 'Courier New', monospace; color: var(--neon-orange); font-size: 0.9rem; margin-top: 10px; }
+        .print-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 15px; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; font-family: 'Courier New', monospace; }
+        .print-btn:hover { background: var(--neon-blue); color: white; border-color: var(--neon-blue); }
+
+        .spec-group { margin-bottom: 50px; }
+        .spec-title { font-size: 1.1rem; color: var(--neon-blue); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 2px; font-weight: bold; }
+        
+        .spec-summary { font-family: 'Courier New', monospace; font-size: 0.95rem; color: #ccc; border-left: 3px solid #444; padding-left: 20px; margin-bottom: 30px; }
+
+        /* TABLES */
+        .spec-table-wrapper { overflow-x: auto; width: 100%; border: 1px solid #222; margin-bottom: 30px; background: #0a0a0a; }
+        .spec-table { width: 100%; min-width: 600px; border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        .spec-table th { text-align: left; background: #1a1a1a; padding: 12px 15px; color: #fff; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        .spec-table td { padding: 12px 15px; border-bottom: 1px solid #222; color: #bbb; }
+        .spec-table tr:last-child td { border-bottom: none; }
+        .table-label { color: var(--neon-orange); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 5px; display: block; }
+
+        /* GRID SPECS */
+        .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .spec-item { background: rgba(255,255,255,0.03); padding: 15px; border: 1px solid #222; }
+        .spec-item strong { display: block; color: #fff; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .spec-item span { color: var(--neon-blue); font-family: 'Courier New', monospace; font-size: 1rem; }
+
+        footer { background: black; padding: 40px; text-align: center; border-top: 1px solid #222; color: #555; margin-top: 0; }
+        
+        @media (max-width: 768px) {
+            .pds-container { padding: 20px; }
+            .pds-title { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+   <nav>
+    <a href="index.html" class="logo"><img src="logo.jpg" alt="ED-XI Logo"></a>
+    <div class="nav-links">
+        <a href="shop.html">Shop</a>
+        <a href="edxv.html">ED-XV</a>
+        <a href="science.html">Science</a>
+        <a href="data.html" style="color: var(--neon-orange);">Data</a>
+        <a href="partners.html">Team</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="https://ed-xi-game-production.up.railway.app/game.html" target="_blank" rel="noopener noreferrer" style="color: var(--neon-orange);">RACING GAME</a>
+    </div>
+</nav>
+
+        
+
+    <div class="pds-wrapper">
+        <div class="pds-container">
+            
+            <div class="pds-header-block">
+                <div>
+                    <div class="pds-title">PRODUCT DATA SHEET</div>
+                    <div class="pds-sub">REF: ED-XI V.2 (pH-Buffered) // 355ml Slim Can</div>
+                </div>
+                <button class="print-btn" onclick="window.print()">Print Spec Sheet</button>
+            </div>
+
+            <div class="spec-group">
+                <h3 class="spec-title">1. Formulation Summary</h3>
+                <p class="spec-summary">
+                    The ED-XI formula utilizes a dual-engine approach: maximizing Nitric Oxide (NO) for vascular health and Nootropics for cognitive reflexes, delivered in a gastric-safe, alkaline-leaning environment (Target pH: 6.0 &plusmn; 0.2).
+                </p>
+            </div>
+
+            <div class="spec-group">
+                <h3 class="spec-title">2. Active Ingredient Composition (Per 355ml)</h3>
+                
+                <span class="table-label">A. THE NITRO-FLOW ENGINE (Vasodilation)</span>
+                <div class="spec-table-wrapper">
+                    <table class="spec-table">
+                        <tr><th>Ingredient</th><th>Dosage</th><th>Specification</th></tr>
+                        <tr><td>L-Citrulline</td><td>3,000 mg</td><td>USP Grade (Fermented)</td></tr>
+                        <tr><td>Red Spinach Extract</td><td>500 mg</td><td>Std. to 9% Nitrates</td></tr>
+                        <tr><td>Pine Bark Extract</td><td>100 mg</td><td>95% Proanthocyanidins</td></tr>
+                        <tr><td>L-Malic Acid</td><td>400 mg</td><td>ATP Cycle Intermediate</td></tr>
+                    </table>
+                </div>
+
+                <span class="table-label">B. THE NEURO-REFLEX STACK (Focus)</span>
+                <div class="spec-table-wrapper">
+                    <table class="spec-table">
+                        <tr><th>Ingredient</th><th>Dosage</th><th>Specification</th></tr>
+                        <tr><td>Guayusa Leaf</td><td>450 mg</td><td>Yields 120mg Caffeine</td></tr>
+                        <tr><td>Alpha-GPC</td><td>300 mg</td><td>50% Yield (Sunflower)</td></tr>
+                        <tr><td>Lion’s Mane</td><td>200 mg</td><td>8:1 Dual Extract</td></tr>
+                    </table>
+                </div>
+
+                <span class="table-label">C. THE VITALITY CORE (Hormonal Support)</span>
+                <div class="spec-table-wrapper">
+                    <table class="spec-table">
+                        <tr><th>Ingredient</th><th>Dosage</th><th>Specification</th></tr>
+                        <tr><td>KSM-66 Ashwagandha</td><td>300 mg</td><td>Full-spectrum root</td></tr>
+                        <tr><td>Black Maca Root</td><td>250 mg</td><td>4:1 Gelatinized</td></tr>
+                        <tr><td>Zinc Bisglycinate</td><td>15 mg</td><td>High-bioavailability</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="spec-group">
+                <h3 class="spec-title">3. The Gastric-Safe Buffer System</h3>
+                <div class="spec-grid">
+                    <div class="spec-item">
+                        <strong>Potassium Bicarbonate</strong>
+                        <span>250mg</span>
+                    </div>
+                    <div class="spec-item">
+                        <strong>Magnesium Hydroxide</strong>
+                        <span>150mg</span>
+                    </div>
+                    <div class="spec-item">
+                        <strong>Carbonation Level</strong>
+                        <span>2.2 Vol</span>
+                    </div>
+                    <div class="spec-item">
+                        <strong>Target pH</strong>
+                        <span>6.0 &plusmn; 0.2</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spec-group">
+                <h3 class="spec-title">4. Physicochemical & Compliance</h3>
+                <div class="spec-grid">
+                    <div class="spec-item"><strong>Appearance</strong><span>Pale Amber</span></div>
+                    <div class="spec-item"><strong>Flavor Profile</strong><span>Yuzu-Blood Orange</span></div>
+                    <div class="spec-item"><strong>Sweetness</strong><span>Monk Fruit / Erythritol</span></div>
+                    <div class="spec-item"><strong>Shelf Life</strong><span>18 Months</span></div>
+                    <div class="spec-item"><strong>WADA Status</strong><span>Safe / Compliant</span></div>
+                    <div class="spec-item"><strong>Dietary</strong><span>Vegan / Keto / Non-GMO</span></div>
+                </div>
+            </div>
+
+            <div class="spec-group">
+                <h3 class="spec-title">5. Usage Protocols</h3>
+                <p style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #aaa;">
+                    <strong>MOTORSPORT:</strong> Consume 20–30 minutes before green flag (Nitrate conversion).<br>
+                    <strong>VITALITY:</strong> Daily consumption supports cumulative adaptogenic benefits.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 ED-XI Performance Fuels. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
+
+

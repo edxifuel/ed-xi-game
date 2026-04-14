@@ -35,6 +35,7 @@ socket.on('roomCreated', (code) => {
 });
 
 socket.on('playerJoined', (data) => {
+  document.getElementById('room-info').style.display = 'none';
   players[data.id] = {
     color: data.color,
     x: canvas.width / 2 + (Math.random() * 100 - 50),
@@ -51,6 +52,9 @@ socket.on('playerJoined', (data) => {
 socket.on('playerLeft', (id) => {
   delete players[id];
   updatePlayerList();
+  if (Object.keys(players).length === 0) {
+    document.getElementById('room-info').style.display = 'block';
+  }
 });
 
 socket.on('playerInput', (data) => {
@@ -155,11 +159,31 @@ function drawCars() {
   });
 }
 
+function drawTrack() {
+  ctx.strokeStyle = 'rgba(0, 255, 221, 0.4)';
+  ctx.lineWidth = 4;
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = '#00FFDD';
+  
+  // Outer Boundary
+  ctx.beginPath();
+  ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.4, canvas.height * 0.4, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Inner Boundary
+  ctx.beginPath();
+  ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.2, canvas.height * 0.2, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  ctx.shadowBlur = 0;
+}
+
 function loop() {
   ctx.fillStyle = 'rgba(5, 5, 16, 0.4)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   drawGrid();
+  drawTrack();
   updatePhysics();
   drawCars();
 

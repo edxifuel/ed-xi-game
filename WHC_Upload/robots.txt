@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ed-xi.ca/sitemap.xml
