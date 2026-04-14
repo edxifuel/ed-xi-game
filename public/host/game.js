@@ -141,12 +141,36 @@ function drawGrid() {
 }
 
 function getWaypoints() {
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2;
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
   
-  if (currentSettings.track === 'neon_ring') {
-    const rx = canvas.width * 0.3;
-    const ry = canvas.height * 0.3;
+  if (currentSettings.track === 'west_coast') {
+    return [
+      {x: w * 0.8, y: h * 0.85},
+      {x: w * 0.2, y: h * 0.85},
+      {x: w * 0.1, y: h * 0.75},
+      {x: w * 0.1, y: h * 0.55},
+      {x: w * 0.25, y: h * 0.45},
+      {x: w * 0.2, y: h * 0.3},
+      {x: w * 0.25, y: h * 0.15},
+      {x: w * 0.45, y: h * 0.1},
+      {x: w * 0.6, y: h * 0.15},
+      {x: w * 0.5, y: h * 0.25},
+      {x: w * 0.35, y: h * 0.35},
+      {x: w * 0.35, y: h * 0.5},
+      {x: w * 0.5, y: h * 0.65},
+      {x: w * 0.7, y: h * 0.55},
+      {x: w * 0.7, y: h * 0.35},
+      {x: w * 0.85, y: h * 0.15},
+      {x: w * 0.95, y: h * 0.25},
+      {x: w * 0.95, y: h * 0.65},
+      {x: w * 0.85, y: h * 0.8}
+    ];
+  } else if (currentSettings.track === 'neon_ring') {
+    const rx = w * 0.3;
+    const ry = h * 0.3;
     return [
       {x: cx, y: cy - ry},
       {x: cx + rx * 0.7, y: cy - ry * 0.7}, 
@@ -160,10 +184,10 @@ function getWaypoints() {
   } else {
     // cyber square uses 20% / 80% boundaries
     return [
-      {x: canvas.width * 0.2, y: canvas.height * 0.2},
-      {x: canvas.width * 0.8, y: canvas.height * 0.2},
-      {x: canvas.width * 0.8, y: canvas.height * 0.8},
-      {x: canvas.width * 0.2, y: canvas.height * 0.8}
+      {x: w * 0.2, y: h * 0.2},
+      {x: w * 0.8, y: h * 0.2},
+      {x: w * 0.8, y: h * 0.8},
+      {x: w * 0.2, y: h * 0.8}
     ];
   }
 }
