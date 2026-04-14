@@ -242,12 +242,11 @@ function getWaypoints() {
   const cx = w / 2;
   const cy = h / 2;
 
-  // Cache resolution to prevent calculating Math 60 frames a second
-  if (lastCanvasSize.w === w && lastCanvasSize.h === h && cachedSplines[currentSettings.track]) {
-     return cachedSplines[currentSettings.track];
+  // Cache: keyed on canvas size AND track name so a track switch always rebuilds
+  const cacheKey = `${currentSettings.track}_${w}_${h}`;
+  if (cachedSplines[cacheKey]) {
+     return cachedSplines[cacheKey];
   }
-  
-  lastCanvasSize = { w, h };
   let rawPoints = [];
   
   if (currentSettings.track === 'vika_short') {
@@ -768,12 +767,12 @@ function getWaypoints() {
   // Neon ring is already an octagon and circular enough, but we can spline it.
   // Cyber square is a literal square, so we shouldn't spline it.
   if (currentSettings.track === 'cyber_square') {
-    cachedSplines[currentSettings.track] = rawPoints;
+    cachedSplines[cacheKey] = rawPoints;
   } else {
-    cachedSplines[currentSettings.track] = generateSpline(rawPoints, 12);
+    cachedSplines[cacheKey] = generateSpline(rawPoints, 12);
   }
   
-  return cachedSplines[currentSettings.track];
+  return cachedSplines[cacheKey];
 }
 
 function getClosestPointOnSegment(p, v, w) {
@@ -1074,8 +1073,19 @@ function drawCars() {
 }
 
 function drawTrack() {
+  // Use the smooth Catmull-Rom splined points for all stroke rendering —
+  // this MUST match what getTrackInfo() uses for physics, otherwise the
+  // visual track and physics boundary are misaligned in corners.
   const points = getWaypoints();
   if (!points || points.length === 0) return;
+
+  // Raw waypoints only needed for the start/finish line position.
+  const rawPoints = (() => {
+    const w = canvas.width, h = canvas.height;
+    // Pull the same raw array used by getWaypoints so S/F is at the right spot.
+    // We only need points[0] and points[1] for the S/F line direction.
+    return points; // splined points are dense enough — point[0] is still near start
+  })();
 
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
