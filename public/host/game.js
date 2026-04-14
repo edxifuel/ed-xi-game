@@ -106,9 +106,13 @@ function updatePhysics() {
 
     p.angle += p.steer * TURN_SPEED * speedFactor;
 
-    if (p.gas > 0) {
+    if (p.gas === 1) {
       p.vx += Math.cos(p.angle) * ENGINE_POWER;
       p.vy += Math.sin(p.angle) * ENGINE_POWER;
+    } else if (p.gas === -1) {
+      // Braking / Reverse (slightly weaker than gas)
+      p.vx -= Math.cos(p.angle) * (ENGINE_POWER * 0.7);
+      p.vy -= Math.sin(p.angle) * (ENGINE_POWER * 0.7);
     }
 
     p.vx *= FRICTION;
@@ -145,7 +149,8 @@ function drawCars() {
     ctx.fill();
     ctx.stroke();
 
-    if (p.gas > 0) {
+    // Gas flames
+    if (p.gas === 1) {
       ctx.beginPath();
       ctx.moveTo(-10, 0);
       ctx.lineTo(-20 - Math.random() * 15, 0);
@@ -153,6 +158,19 @@ function drawCars() {
       ctx.lineWidth = 3;
       ctx.shadowColor = '#00FFDD';
       ctx.stroke();
+    }
+
+    // Brake lights
+    if (p.gas === -1) {
+      ctx.fillStyle = '#FF0055';
+      ctx.shadowColor = '#FF0055';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(-14, -10, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(-14, 10, 4, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     ctx.restore();

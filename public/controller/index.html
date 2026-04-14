@@ -10,6 +10,13 @@
 </head>
 <body>
 
+  <!-- PORTRAIT WARNING -->
+  <div id="portrait-lock" class="portrait-lock">
+    <div class="rotate-icon">↺</div>
+    <h1>ROTATE DEVICE</h1>
+    <p>Please hold your phone horizontally like a steering wheel.</p>
+  </div>
+
   <!-- JOIN SCREEN -->
   <div id="join-screen" class="screen active">
     <div class="grid-overlay"></div>
@@ -36,9 +43,29 @@
       <p>HOLD ANYWHERE FOR GAS</p>
     </div>
 
-    <!-- The whole screen is a gas pedal basically, but we'll put a visual indicator -->
-    <div class="gas-indicator" id="gas-indicator">
-      <div class="pedal-icon">GAS</div>
+    <!-- COCKPIT UI -->
+    <div class="cockpit">
+      <div class="pedal brake-pedal" id="brake-pedal">
+        <span class="pedal-label">BRAKE/REV</span>
+      </div>
+      
+      <div class="steering-column">
+        <svg id="steering-wheel" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <!-- Wheel Grips -->
+          <path d="M 15 30 A 45 45 0 0 0 15 70" fill="none" stroke="var(--neon-blue)" stroke-width="12" stroke-linecap="round"/>
+          <path d="M 85 30 A 45 45 0 0 1 85 70" fill="none" stroke="var(--neon-blue)" stroke-width="12" stroke-linecap="round"/>
+          <!-- Metal Crossbar -->
+          <rect x="15" y="42" width="70" height="16" fill="var(--neon-blue)" rx="2"/>
+          <!-- Center Hub -->
+          <circle cx="50" cy="50" r="16" fill="#000" stroke="var(--neon-pink)" stroke-width="4"/>
+          <!-- ED-XI logo inside hub -->
+          <text x="50" y="52" fill="white" font-family="'Press Start 2P', cursive" font-size="6" text-anchor="middle" dominant-baseline="middle">XI</text>
+        </svg>
+      </div>
+
+      <div class="pedal gas-pedal" id="gas-pedal">
+        <span class="pedal-label">GAS</span>
+      </div>
     </div>
   </div>
 

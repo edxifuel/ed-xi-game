@@ -6,7 +6,9 @@ const roomCodeInput = document.getElementById('room-code-input');
 const joinBtn = document.getElementById('join-btn');
 const errorMsg = document.getElementById('error-msg');
 const playerColorBox = document.getElementById('player-color-box');
-const gasIndicator = document.getElementById('gas-indicator');
+const connectionStatus = document.getElementById('connection-status');
+const gasPedal = document.getElementById('gas-pedal');
+const brakePedal = document.getElementById('brake-pedal');
 const connectionStatus = document.getElementById('connection-status');
 
 let currentRoomCode = '';
@@ -85,68 +87,113 @@ socket.on('hostDisconnected', () => {
 
 // INPUT CAPTURE
 
-// Touch for Gas (anywhere on screen)
-document.addEventListener('touchstart', (e) => {
-  if (!isConnected) return;
-  e.preventDefault(); // prevents pull-to-refresh
-  padGas = 1;
-  gasIndicator.classList.add('active');
-}, { passive: false });
-
-document.addEventListener('touchend', (e) => {
+// Gas Pedal
+gasPedal.addEventListener('touchstart', (e) => {
   if (!isConnected) return;
   e.preventDefault();
-  if (e.touches.length === 0) {
-    padGas = 0;
-    gasIndicator.classList.remove('active');
-  }
+  padGas = 1;
+  gasPedal.classList.add('active');
 }, { passive: false });
 
-// Support mouse click for desktop testing
-document.addEventListener('mousedown', (e) => {
+gasPedal.addEventListener('touchend', (e) => {
+  if (!isConnected) return;
+  e.preventDefault();
+  padGas = 0;
+  gasPedal.classList.remove('active');
+}, { passive: false });
+
+gasPedal.addEventListener('mousedown', (e) => {
   if (!isConnected) return;
   padGas = 1;
-  gasIndicator.classList.add('active');
+  gasPedal.classList.add('active');
 });
 
-document.addEventListener('mouseup', (e) => {
-  if (!isConnected) return;
+gasPedal.addEventListener('mouseup', (e) => {
   padGas = 0;
-  gasIndicator.classList.remove('active');
+  gasPedal.classList.remove('active');
+});
+
+// Brake Pedal
+brakePedal.addEventListener('touchstart', (e) => {
+  if (!isConnected) return;
+  e.preventDefault();
+  padGas = -1;
+  brakePedal.classList.add('active');
+}, { passive: false });
+
+brakePedal.addEventListener('touchend', (e) => {
+  if (!isConnected) return;
+  e.preventDefault();
+  padGas = 0;
+  brakePedal.classList.remove('active');
+}, { passive: false });
+
+brakePedal.addEventListener('mousedown', (e) => {
+  if (!isConnected) return;
+  padGas = -1;
+  brakePedal.classList.add('active');
+});
+
+brakePedal.addEventListener('mouseup', (e) => {
+  padGas = 0;
+  brakePedal.classList.remove('active');
 });
 
 // Tilt for Steering
 function handleOrientation(event) {
   if (!isConnected) return;
   
-  let gamma = event.gamma; // In degree in the range [-90,90]
+  let tilt = 0;
+  const orientation = (screen.orientation || {}).type || window.orientation || 0;
   
-  // Handle edge case if device is upside down (beta > 90 or beta < -90)
-  // Assume simple portrait/landscape steering wheel logic for now
+  // In landscape, left/right steering is measured around the Beta axis
+  if (orientation === 90 || orientation === 'landscape-primary') {
+    tilt = event.beta;
+  } else if (orientation === -90 || orientation === 'landscape-secondary') {
+    tilt = -event.beta;
+  } else {
+    // Portrait fallback
+    tilt = event.gamma; 
+  }
   
-  // Clamp gamma to [-45, 45] for max steering
-  if (gamma > 45) gamma = 45;
-  if (gamma < -45) gamma = -45;
+  // Clamp tilt
+  if (tilt > 45) tilt = 45;
+  if (tilt < -45) tilt = -45;
   
-  // Normalize to [-1, 1]
-  padSteer = gamma / 45;
+  padSteer = tilt / 45;
+
+  // Animate SVG Steering Wheel
+  const wheel = document.getElementById('steering-wheel');
+  if (wheel) {
+    wheel.style.transform = `rotate(${padSteer * 90}deg)`;
+  }
 }
 
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
+  if (!isConnected) return;
   if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = -1;
   if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 1;
   if (e.key === 'ArrowUp' || e.key === 'w') {
     padGas = 1;
-    gasIndicator.classList.add('active');
+    gasPedal.classList.add('active');
+  }
+  if (e.key === 'ArrowDown' || e.key === 's') {
+    padGas = -1;
+    brakePedal.classList.add('active');
   }
 });
 
 document.addEventListener('keyup', (e) => {
+  if (!isConnected) return;
   if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') padSteer = 0;
   if (e.key === 'ArrowUp' || e.key === 'w') {
     padGas = 0;
-    gasIndicator.classList.remove('active');
+    gasPedal.classList.remove('active');
+  }
+  if (e.key === 'ArrowDown' || e.key === 's') {
+    padGas = 0;
+    brakePedal.classList.remove('active');
   }
 });
 
