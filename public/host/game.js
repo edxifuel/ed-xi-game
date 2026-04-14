@@ -157,7 +157,7 @@ function updatePlayerList() {
 // PHYSICS & RENDER LOOP
 const ENGINE_POWER = 0.08;
 const FRICTION = 0.95;
-const TURN_SPEED = 0.04;
+const TURN_SPEED = 0.055;
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
@@ -753,23 +753,25 @@ function getWaypoints() {
   return cachedSplines[currentSettings.track];
 }
 
-function distToSegmentSquared(p, v, w) {
+function getClosestPointOnSegment(p, v, w) {
   const l2 = (w.x - v.x) ** 2 + (w.y - v.y) ** 2;
-  if (l2 === 0) return (p.x - v.x) ** 2 + (p.y - v.y) ** 2;
+  if (l2 === 0) return { x: v.x, y: v.y, distSq: (p.x - v.x) ** 2 + (p.y - v.y) ** 2 };
   let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
   t = Math.max(0, Math.min(1, t));
-  return (p.x - (v.x + t * (w.x - v.x))) ** 2 + (p.y - (v.y + t * (w.y - v.y))) ** 2;
+  const cx = v.x + t * (w.x - v.x);
+  const cy = v.y + t * (w.y - v.y);
+  return { x: cx, y: cy, distSq: (p.x - cx) ** 2 + (p.y - cy) ** 2 };
 }
 
-function getDistToTrack(x, y, waypoints) {
-  let minDistSq = Infinity;
+function getTrackInfo(x, y, waypoints) {
+  let minInfo = { distSq: Infinity, x: 0, y: 0 };
   for(let i=0; i<waypoints.length; i++) {
     const v = waypoints[i];
     const w = waypoints[(i+1) % waypoints.length];
-    const distSq = distToSegmentSquared({x, y}, v, w);
-    if (distSq < minDistSq) minDistSq = distSq;
+    const info = getClosestPointOnSegment({x, y}, v, w);
+    if (info.distSq < minInfo.distSq) minInfo = info;
   }
-  return Math.sqrt(minDistSq);
+  return { distance: Math.sqrt(minInfo.distSq), closestX: minInfo.x, closestY: minInfo.y };
 }
 
 function updatePhysics() {
@@ -834,9 +836,18 @@ function updatePhysics() {
 
     // Mathematical Map Boundaries (Grass Simulation)
     let currentFriction = FRICTION;
-    const distFromCenter = getDistToTrack(p.x, p.y, waypoints);
-    if (distFromCenter > 40) {
-      currentFriction = 0.85; // Off-road grip penalty
+    const trackInfo = getTrackInfo(p.x, p.y, waypoints);
+    if (trackInfo.distance > 42) {
+      // Physical Barrier! Push kart perfectly back to the edge of the grass!
+      const dx = p.x - trackInfo.closestX;
+      const dy = p.y - trackInfo.closestY;
+      const nx = dx / trackInfo.distance;
+      const ny = dy / trackInfo.distance;
+      p.x = trackInfo.closestX + nx * 42;
+      p.y = trackInfo.closestY + ny * 42;
+      
+      // Absorb some speed into the wall so it acts like a soft foam barrier
+      currentFriction = 0.85; 
     }
 
     // ── Vector Decomposition Physics ──────────────────────────────────────────
