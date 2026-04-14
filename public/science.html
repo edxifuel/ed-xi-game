@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED-XI | Performance Protocol</title>
+
+    <meta name="description" content="The Science of ED-XI: Understanding the pH-buffered protocol.">
+    <meta name="robots" content="index, follow">
+
+    <style>
+        /* --- RESET & BASICS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a0a; color: #ffffff; line-height: 1.6; }
+        
+        :root { --neon-orange: #FF6B00; --neon-blue: #0055FF; --carbon-dark: #111111; --text-gray: #b0b0b0; --hazard-yellow: #FFD700; }
+
+        /* --- NAV --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(0, 0, 0, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .logo { display: flex; align-items: center; }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon-orange); }
+
+        /* --- HEADER --- */
+        .science-header { padding: 120px 5% 40px 5%; text-align: center; background: linear-gradient(to bottom, #1a1a1a, #0a0a0a); }
+        .science-header h1 { font-size: 3rem; text-transform: uppercase; margin-bottom: 10px; }
+        .text-blue { color: var(--neon-blue); }
+        .text-orange { color: var(--neon-orange); }
+        .science-header p { color: var(--text-gray); max-width: 600px; margin: 0 auto; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+
+        /* --- VISUALS --- */
+        .visual-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 5%; position: relative; }
+        .visual-frame { border: 1px solid #333; border-radius: 8px; overflow: hidden; box-shadow: 0 0 50px rgba(0, 85, 255, 0.1); }
+        .visual-frame img { width: 100%; height: auto; display: block; }
+        .visual-caption { text-align: center; font-size: 0.8rem; color: var(--neon-orange); letter-spacing: 2px; text-transform: uppercase; margin-top: 15px; font-weight: bold; }
+
+        /* --- SECTIONS --- */
+        .white-paper-section { padding: 80px 10%; background-color: #0a0a0a; border-bottom: 1px solid #222; }
+        .section-title { font-size: 2.2rem; color: white; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 1px; text-align: center; }
+        .section-subtitle { text-align: center; color: var(--neon-blue); font-family: 'Courier New', monospace; margin-bottom: 40px; display: block; }
+
+        .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .problem-card { background: #111; border: 1px solid #333; padding: 30px; border-left: 3px solid #ff3333; }
+        .problem-card h3 { color: #ff3333; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 10px; }
+        .problem-card p { color: #aaa; font-size: 0.95rem; }
+
+        .solution-section { background: #111; padding: 80px 5%; }
+        .solution-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .solution-card { background: rgba(0, 85, 255, 0.05); border: 1px solid var(--neon-blue); padding: 30px; border-radius: 8px; }
+        .solution-card h3 { color: var(--neon-blue); text-transform: uppercase; font-size: 1.2rem; margin-bottom: 10px; }
+        .solution-card p { color: #ccc; }
+
+        /* --- TECH LINK SECTION --- */
+        .tech-link-section { text-align: center; padding: 80px 5%; background: #080808; border-top: 1px solid #333; }
+        .btn-tech { 
+            border: 1px solid #444; color: #888; padding: 20px 40px; 
+            text-decoration: none; text-transform: uppercase; 
+            font-family: 'Courier New', monospace; transition: 0.3s; 
+            font-size: 1rem; letter-spacing: 1px; display: inline-block;
+        }
+        .btn-tech:hover { border-color: var(--neon-orange); color: white; background: #111; box-shadow: 0 0 20px rgba(255, 107, 0, 0.2); }
+
+        /* --- HAZARD FOOTER SECTION --- */
+        .hazard-section {
+            background: repeating-linear-gradient(
+                45deg,
+                var(--hazard-yellow),
+                var(--hazard-yellow) 20px,
+                #000 20px,
+                #000 40px
+            );
+            padding: 60px 20px;
+            display: flex; justify-content: center; align-items: center;
+            border-top: 1px solid #333;
+        }
+
+        .caution-box {
+            background: #000;
+            border: 3px solid var(--hazard-yellow);
+            padding: 40px;
+            max-width: 800px;
+            text-align: left;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .caution-box h3 {
+            color: var(--hazard-yellow);
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .caution-list { list-style: none; padding: 0; }
+        .caution-list li {
+            color: var(--hazard-yellow);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex; align-items: flex-start;
+        }
+        .caution-list li::before { content: '⚠️'; margin-right: 15px; }
+
+        footer { background: black; padding: 40px; text-align: center; border-top: 1px solid #222; color: #555; margin-top: 0; }
+    </style>
+</head>
+<body>
+
+    <nav>
+    <a href="index.html" class="logo"><img src="logo.jpg" alt="ED-XI Logo"></a>
+    <div class="nav-links">
+        <a href="shop.html">Shop</a>
+        <a href="edxv.html">ED-XV</a>
+        <a href="science.html" style="color: var(--neon-orange);">Science</a>
+        <a href="data.html">Data</a>
+        <a href="partners.html">Team</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="game.html" style="color: var(--neon-orange);">RACING GAME</a>
+    </div>
+</nav>
+
+
+    <header class="science-header">
+        <h1>The ED-XI <span class="text-blue">Performance</span> <span class="text-orange">Protocol</span></h1>
+        <p>SUBJECT: OVERCOMING THE "ACID-CAFFEINE LOOP"</p>
+    </header>
+
+    <div class="visual-container">
+        <div class="visual-frame"><img src="split-concept.jpg" alt="Engine and Bedroom Split View"></div>
+        <div class="visual-caption">/// Fig 1. The Dual Environment Protocol</div>
+    </div>
+
+    <section class="white-paper-section">
+        <h2 class="section-title">1. The Problem</h2>
+        <span class="section-subtitle">THE "ACID-CAFFEINE LOOP" IN HIGH-PERFORMANCE ENVIRONMENTS</span>
+        <div class="problem-grid">
+            <div class="problem-card">
+                <h3>Gastric Reflux</h3>
+                <p>Acidic drinks (pH &lt; 3.0) cause the esophageal sphincter to relax. During high G-force cornering or physical exertion, this leads to immediate heartburn.</p>
+            </div>
+            <div class="problem-card">
+                <h3>Vasoconstriction</h3>
+                <p>Synthetic stimulants constrict blood vessels—restricting flow exactly when you need it most for stamina and vitality.</p>
+            </div>
+            <div class="problem-card">
+                <h3>The Cortisol Spike</h3>
+                <p>High acidity + synthetic caffeine spikes stress hormones, creating anxiety and leading to an inevitable "crash" and decreased libido.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="solution-section">
+        <h2 class="section-title">2. The ED-XI Solution</h2>
+        <span class="section-subtitle">pH-BUFFERED BIO-AVAILABILITY (pH 6.0)</span>
+        <div class="solution-grid">
+            <div class="solution-card">
+                <h3>The Nitrate Pathway</h3>
+                <p>Unlike caffeine which "borrows" energy, our <strong>Red Spinach Nitrates</strong> provide "real" energy by increasing oxygen efficiency in the blood.</p>
+            </div>
+            <div class="solution-card">
+                <h3>Krebs Cycle Boost</h3>
+                <p>By using <strong>Malic Acid</strong> instead of Citric Acid, ED-XI provides a substrate used directly by mitochondria to produce ATP (cellular energy).</p>
+            </div>
+            <div class="solution-card">
+                <h3>Cortisol Blunting</h3>
+                <p><strong>KSM-66 Ashwagandha</strong> is clinically shown to reduce cortisol by 27%. This keeps you "cool" under the helmet and "ready" in the bedroom.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-link-section">
+        <p style="color: #666; margin-bottom: 20px; font-family: 'Courier New', monospace;">[ ACCESSING CLASSIFIED DATA ]</p>
+        <a href="data.html" class="btn-tech">View Official Product Data Sheet →</a>
+    </section>
+
+    <section class="hazard-section">
+        <div class="caution-box">
+            <h3>⚠️ CAUTION: HIGH TORQUE OUTPUT</h3>
+            <ul class="caution-list">
+                <li>May cause increased vascularity and aggressive overtaking maneuvers.</li>
+                <li>Do not exceed 2 cans per 24-hour cycle.</li>
+                <li>If performance lasts for more than 4 hours, <strong>high-five your mechanic.</strong></li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 ED-XI Performance Fuels. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

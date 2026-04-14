@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED-XV | Digital Zen</title>
+    <meta name="description" content="ED-XV Youth Formula. Zero Caffeine. 100% Focus. The ultimate flow-state fuel for gamers and students.">
+    
+    <style>
+        /* --- RESET & BASICS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #050505; color: #ffffff; line-height: 1.6; }
+
+        /* --- COLORS (The XV Palette) --- */
+        :root {
+            --neon-orange: #FF6B00; 
+            --neon-blue: #0055FF; 
+            --zen-cyan: #00FFFF; /* Digital Zen Accent */
+            --carbon-dark: #111111;
+        }
+
+        /* --- NAV --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(0, 0, 0, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon-orange); }
+
+        /* --- HEADER SECTION --- */
+        .xv-header-section {
+            padding: 140px 5% 10px 5%; 
+            text-align: center;
+            background: #050505;
+        }
+        
+        .xv-title {
+            font-size: 3.5rem; 
+            text-transform: uppercase; 
+            font-weight: 900; 
+            line-height: 1.1; 
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+        
+        .text-blue { color: var(--neon-blue); text-shadow: 0 0 20px rgba(0, 85, 255, 0.4); }
+        .text-orange { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255, 107, 0, 0.4); }
+        
+        .xv-subtitle {
+            font-family: 'Courier New', monospace; 
+            color: #888; 
+            font-size: 0.9rem; 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            margin-bottom: 30px;
+        }
+
+        .xv-desc {
+            font-size: 1.1rem; 
+            color: #ccc; 
+            max-width: 700px; 
+            margin: 0 auto; 
+            font-weight: 400;
+        }
+
+        /* --- IMAGE VISUAL ("Fig 1") --- */
+        .xv-visual-container {
+            max-width: 1600px; 
+            width: 90%; 
+            margin: 20px auto 30px auto; 
+            padding: 0;
+            text-align: center;
+        }
+
+        .xv-image-frame {
+            width: 100%;
+            height: 550px; 
+            background: url('edxv-hero.jpg') center/cover no-repeat;
+            border-radius: 16px;
+            border: 1px solid #333;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .xv-caption {
+            font-family: 'Courier New', monospace;
+            color: var(--zen-cyan);
+            font-size: 0.8rem;
+            margin-top: 15px;
+            letter-spacing: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .btn-buy {
+            padding: 15px 40px; background: linear-gradient(90deg, var(--neon-orange), #ff4500);
+            color: white; text-decoration: none; font-weight: 800; text-transform: uppercase; 
+            border: none; cursor: pointer; font-size: 1rem; display: inline-block;
+            clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+            transition: 0.3s;
+            margin-top: 25px; 
+        }
+        .btn-buy:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 107, 0, 0.4); }
+
+        /* --- DUAL HOOK SECTION --- */
+        .dual-section { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            /* CHANGED: Removed min-height so it collapses to fit content */
+            border-top: 1px solid #222; 
+        }
+        
+        .hook-panel { 
+            padding: 60px 10%; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+        }
+        
+        .parent-side { background: #0a0a0a; border-right: 1px solid #222; position: relative; }
+        .parent-side h2 { color: var(--zen-cyan); font-size: 2.5rem; text-transform: uppercase; margin-bottom: 20px; }
+        .check-list li { margin-bottom: 15px; color: #ccc; list-style: none; font-size: 1.1rem; display: flex; align-items: center; }
+        .check-list li::before { content: '✓'; color: var(--zen-cyan); margin-right: 15px; font-weight: bold; }
+
+        .gamer-side { background: #050505; }
+        .gamer-side h2 { color: var(--neon-orange); font-size: 2.5rem; text-transform: uppercase; margin-bottom: 20px; }
+        .gamer-list li { margin-bottom: 15px; color: #aaa; list-style: none; font-size: 1.1rem; }
+        .gamer-list li strong { color: var(--neon-orange); }
+
+        /* --- INTERACTIVE TECH SECTION --- */
+        .tech-section { padding: 80px 5%; background: #080808; text-align: center; border-top: 1px solid #333; min-height: 600px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1200px; margin: 40px auto 0 auto; }
+        
+        .tech-card { 
+            background: #111; padding: 30px; border: 1px solid #333; border-radius: 8px; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .tech-card:hover { border-color: #333; transform: translateY(-5px); background: #151515; }
+        .tech-card.active { border-color: var(--zen-cyan); background: #001a1a; box-shadow: 0 0 30px rgba(0, 255, 255, 0.15); transform: scale(1.02); }
+
+        .tech-icon { font-size: 3rem; margin-bottom: 15px; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
+        .tech-title { color: white; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; font-size: 1.2rem; }
+        .tech-desc { color: #888; font-size: 0.95rem; margin-bottom: 20px; transition: 0.3s; }
+        
+        .tech-deep-dive {
+            max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s ease;
+            text-align: left; border-top: 1px solid rgba(0,255,255,0.2); padding-top: 0; margin-top: 0; color: #ccc; font-size: 0.9rem;
+        }
+        .tech-card.active .tech-deep-dive { max-height: 200px; opacity: 1; padding-top: 20px; margin-top: 10px; }
+
+        .tap-hint { font-size: 0.7rem; color: var(--zen-cyan); font-family: 'Courier New', monospace; letter-spacing: 2px; margin-top: auto; opacity: 0.7; }
+        .tech-card.active .tap-hint { display: none; }
+
+        /* --- DATA TERMINAL STYLES --- */
+        .data-terminal { background: #050505; padding: 80px 5%; border-top: 1px solid #222; font-family: 'Courier New', monospace; }
+        .terminal-header { text-align: center; margin-bottom: 50px; }
+        .terminal-header h2 { color: #fff; text-transform: uppercase; font-family: 'Segoe UI', sans-serif; letter-spacing: 2px; }
+        .terminal-header span { color: var(--zen-cyan); font-size: 0.8rem; background: rgba(0, 255, 255, 0.1); padding: 5px 15px; border: 1px solid var(--zen-cyan); }
+
+        .data-grid-layout { display: flex; flex-wrap: wrap; gap: 60px; justify-content: center; max-width: 1200px; margin: 0 auto; }
+
+        .nutrition-panel { flex: 1; min-width: 300px; max-width: 400px; border: 2px solid #333; padding: 20px; background: #0a0a0a; }
+        .nutri-title { font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 5px; font-family: 'Arial Black', sans-serif; border-bottom: 1px solid #fff; padding-bottom: 5px;}
+        .serving-size { font-size: 0.9rem; margin-bottom: 10px; border-bottom: 10px solid #fff; padding-bottom: 5px; }
+        .calories-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #fff; padding-bottom: 5px; margin-bottom: 10px; }
+        .cal-label { font-size: 1rem; font-weight: bold; }
+        .cal-val { font-size: 2rem; font-weight: 900; line-height: 1; }
+        
+        .nutri-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0; font-size: 0.9rem; }
+        .nutri-row.indent { padding-left: 20px; }
+        .dv { font-weight: bold; }
+
+        .specs-panel { flex: 2; min-width: 300px; }
+        .spec-table { width: 100%; border-collapse: collapse; }
+        .spec-table th { text-align: left; color: var(--zen-cyan); border-bottom: 1px solid var(--zen-cyan); padding: 10px 0; font-size: 0.9rem; letter-spacing: 2px; }
+        .spec-table td { padding: 15px 0; border-bottom: 1px solid #222; color: #ccc; font-size: 0.95rem; }
+        .spec-key { font-weight: bold; color: #fff; width: 40%; }
+        .spec-value { font-family: monospace; color: #888; }
+        
+        .highlight-box { margin-top: 30px; padding: 20px; border: 1px dashed var(--zen-cyan); background: rgba(0, 255, 255, 0.05); color: var(--zen-cyan); font-size: 0.9rem; }
+
+        footer { background: black; padding: 40px; text-align: center; border-top: 1px solid #222; color: #555; }
+
+        @media (max-width: 900px) {
+            .dual-section { grid-template-columns: 1fr; }
+            .hook-panel { padding: 60px 5%; }
+            .parent-side { border-right: none; border-bottom: 1px solid #222; }
+            .xv-title { font-size: 2.5rem; }
+            .xv-image-frame { height: 300px; }
+        }
+        @media (max-width: 768px) {
+            .data-grid-layout { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="logo-2.jpg" alt="ED-XV Logo"></a>
+        <div class="nav-links">
+            <a href="shop.html">Shop</a>
+            <a href="edxv.html" style="color: var(--zen-cyan);">ED-XV</a>
+            <a href="science.html">Science</a>
+            <a href="data.html">Data</a>
+            <a href="partners.html">Team</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+        <a href="game.html" style="color: var(--neon-orange);">RACING GAME</a>
+        </div>
+    </nav>
+
+    <section class="xv-header-section">
+        <h1 class="xv-title"><span class="text-blue">DIGITAL</span> <span class="text-orange">ZEN</span></h1>
+        <div class="xv-subtitle">SUBJECT: YOUTH FORMULA V.1.0 /// FOCUS WITHOUT THE CRASH</div>
+        
+        <p class="xv-desc">
+            Unlike our adult formula which is about raw torque, ED-XV is about Precision and Control. 
+            All the focus. None of the crash.
+        </p>
+    </section>
+
+    <div class="xv-visual-container">
+        <div class="xv-image-frame"></div>
+        <div class="xv-caption">/// FIG 1. THE FLOW STATE ENVIRONMENT</div>
+        
+        <a href="shop.html#edxv" class="btn-buy">Initialize Flow State</a>
+    </div>
+
+    <section class="dual-section">
+        
+        <div class="hook-panel parent-side">
+            <span style="color: var(--zen-cyan); font-family: monospace; margin-bottom: 10px;">SAFETY PROTOCOLS: ACTIVE</span>
+            <h2>The "No-Crash" Promise</h2>
+            <p style="color: #ccc; margin-bottom: 30px;">
+                Engineered for developing minds. We removed the stimulants but kept the science.
+                Safe for daily use without the anxiety loops.
+            </p>
+            <ul class="check-list">
+                <li><strong>0mg Caffeine:</strong> No sleepless nights.</li>
+                <li><strong>pH 6.0 Buffered:</strong> Protects tooth enamel from acid.</li>
+                <li><strong>Hydration Matrix:</strong> Coconut water electrolytes.</li>
+                <li><strong>Sugar Free:</strong> Monk Fruit & Erythritol.</li>
+            </ul>
+        </div>
+
+        <div class="hook-panel gamer-side">
+            <span style="color: var(--neon-orange); font-family: monospace; margin-bottom: 10px;">TARGET: GAMER / STUDENT</span>
+            <h2>Master Your Mind</h2>
+            <p style="color: #ccc; margin-bottom: 30px;">
+                Whether you're clutching the final round or crushing a 3-hour study session, 
+                you need sustained attention, not the shakes.
+            </p>
+            <ul class="gamer-list">
+                <li><strong>Gaming:</strong> Precision aiming with zero jitter.</li>
+                <li><strong>School:</strong> Laser-sharp recall for finals.</li>
+                <li><strong>Sports:</strong> Mental clarity on the track.</li>
+            </ul>
+        </div>
+
+    </section>
+
+    <section id="tech" class="tech-section">
+        <h2 style="font-size: 2.5rem; text-transform: uppercase;">Powered by <span style="color: var(--zen-cyan);">Nootropics</span></h2>
+        <p style="color: #888; max-width: 600px; margin: 0 auto;">It's not magic. It's biology. Click to inspect.</p>
+
+        <div class="tech-grid">
+            
+            <div class="tech-card" onclick="toggleCard(this)">
+                <span class="tech-icon">🧠</span>
+                <div class="tech-title">Alpha-GPC</div>
+                <div class="tech-desc">The fuel your neurotransmitters crave. Improves memory recall and learning speed.</div>
+                <div class="tap-hint">[ TAP TO DECLASSIFY ]</div>
+                <div class="tech-deep-dive">
+                    <p><strong>Mechanism:</strong> Alpha-GPC crosses the blood-brain barrier to rapidly increase Acetylcholine levels.</p>
+                    <p style="margin-top:10px; color: var(--zen-cyan);"><strong>Result:</strong> Faster reaction times in-game and better information retention while studying.</p>
+                </div>
+            </div>
+
+            <div class="tech-card" onclick="toggleCard(this)">
+                <span class="tech-icon">🍄</span>
+                <div class="tech-title">Lion's Mane</div>
+                <div class="tech-desc">An ancient mushroom extract proven to support nerve growth factor and cognitive clarity.</div>
+                <div class="tap-hint">[ TAP TO DECLASSIFY ]</div>
+                <div class="tech-deep-dive">
+                    <p><strong>Mechanism:</strong> Stimulates the synthesis of Nerve Growth Factor (NGF), which repairs and protects neurons.</p>
+                    <p style="margin-top:10px; color: var(--zen-cyan);"><strong>Result:</strong> Reduces "brain fog" and sustains mental energy for longer sessions without a caffeine crash.</p>
+                </div>
+            </div>
+
+            <div class="tech-card" onclick="toggleCard(this)">
+                <span class="tech-icon">🥥</span>
+                <div class="tech-title">Coconut Hydro</div>
+                <div class="tech-desc">Natural electrolytes to keep the brain hydrated during long sessions.</div>
+                <div class="tap-hint">[ TAP TO DECLASSIFY ]</div>
+                <div class="tech-deep-dive">
+                    <p><strong>Mechanism:</strong> A natural source of Potassium and Magnesium that provides intracellular hydration.</p>
+                    <p style="margin-top:10px; color: var(--zen-cyan);"><strong>Result:</strong> Prevents the headaches and fatigue that come from intense concentration and screen time.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="data-terminal">
+        <div class="terminal-header">
+            <span>/// CLASSIFIED DATA: PUBLIC RELEASE</span>
+            <h2 style="margin-top: 15px;">Technical Specifications</h2>
+        </div>
+
+        <div class="data-grid-layout">
+            
+            <div class="nutrition-panel">
+                <div class="nutri-title">Supplement Facts</div>
+                <div class="serving-size">Serving Size: 1 Can (473 mL)</div>
+                
+                <div class="calories-row">
+                    <span class="cal-label">Calories</span>
+                    <span class="cal-val">15</span>
+                </div>
+
+                <div class="nutri-row"><span>Total Fat 0g</span><span class="dv">0%</span></div>
+                <div class="nutri-row"><span>Sodium 140mg</span><span class="dv">6%</span></div>
+                <div class="nutri-row"><span>Total Carbohydrate 4g</span><span class="dv">1%</span></div>
+                <div class="nutri-row indent">Total Sugars 0g</div>
+                <div class="nutri-row indent">Incl. 0g Added Sugars</div>
+                <div class="nutri-row indent">Erythritol 4g</div>
+                <div class="nutri-row"><span>Protein 0g</span><span class="dv"></span></div>
+
+                <div style="margin-top: 20px; padding-top: 10px; border-top: 4px solid #fff;">
+                    <div class="nutri-row" style="color: var(--zen-cyan);"><strong>ACTIVE MATRIX</strong></div>
+                    <div class="nutri-row"><span>Lion's Mane (8:1)</span><span>500 mg</span></div>
+                    <div class="nutri-row"><span>Alpha-GPC (50%)</span><span>300 mg</span></div>
+                    <div class="nutri-row"><span>Magnesium Glycinate</span><span>150 mg</span></div>
+                    <div class="nutri-row"><span>L-Theanine</span><span>100 mg</span></div>
+                    <div class="nutri-row"><span>Caffeine</span><span>0 mg</span></div>
+                </div>
+            </div>
+
+            <div class="specs-panel">
+                <table class="spec-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2">/// SYSTEM DIAGNOSTICS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="spec-key">FLAVOR PROFILE</td>
+                            <td class="spec-value">"Glitch Berry" (Blue Raspberry + Yuzu)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-key">pH LEVEL</td>
+                            <td class="spec-value">6.0 ± 0.2 (Buffered / Non-Erosive)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-key">CARBONATION</td>
+                            <td class="spec-value">2.6 Vol (Medium-Soft)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-key">SWEETENER SYSTEM</td>
+                            <td class="spec-value">Erythritol + Stevia (Reb M)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-key">COLOR</td>
+                            <td class="spec-value">Electric Blue (Natural Spirulina)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-key">SHELF LIFE</td>
+                            <td class="spec-value">18 Months (Ambient)</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-key">REGULATORY</td>
+                            <td class="spec-value">Health Canada Supplemented Food (TMA Pending)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight-box">
+                    <strong>/// SAFETY PROTOCOL:</strong><br>
+                    Magnesium Glycinate is used specifically to reduce "jitter" and anxiety. 
+                    Formula stays under the 122mg Choline limit to ensure compliance for ages 14+.
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 ED-XI Performance Fuels. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function toggleCard(card) {
+            document.querySelectorAll('.tech-card').forEach(c => {
+                if (c !== card) c.classList.remove('active');
+            });
+            card.classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProLapS RacerS | Official Partners</title>
+    <meta name="description" content="ProLapS RacerS Factory Team Partners. Powered by ED-XI Performance Fuels. Season 2026 Official Data.">
+    <style>
+        /* --- RESET & BASICS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a0a; color: #ffffff; line-height: 1.6; overflow-x: hidden; }
+        :root { --neon-orange: #FF6B00; --neon-blue: #0055FF; --carbon-dark: #111111; }
+
+        /* --- NAV MENU --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(0, 0, 0, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .logo { display: flex; align-items: center; }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon-orange); }
+
+        /* --- DASHBOARD CONTAINER --- */
+        .dashboard-container {
+            min-height: 100vh; width: 100%;
+            background: url('team-garage.jpg') no-repeat center center; 
+            background-size: cover;
+            position: relative; 
+            display: flex; 
+            align-items: flex-start; 
+            padding-top: 35vh; /* Tightened from 45vh to reduce scrolling */
+            justify-content: center;
+        }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2) 100%); z-index: 1; }
+        
+        /* THEME: Wide thematic grid */
+        .content-grid { 
+            position: relative; 
+            z-index: 2; 
+            width: 98%; 
+            max-width: 1900px; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15vw; /* Slightly tightened from 20vw */
+            align-items: center; 
+        }
+
+        /* --- TEAM IDENTITY --- */
+        .team-identity { text-align: left; padding-left: 2%; }
+        .team-logo-img { 
+            width: 100%; 
+            max-width: 500px; /* Tightened from 650px */
+            height: auto; 
+            filter: drop-shadow(0 0 25px rgba(255, 107, 0, 0.3)); 
+            margin-bottom: 20px; 
+        }
+        .team-tagline { font-size: 1.5rem; text-transform: uppercase; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); border-left: 4px solid var(--neon-blue); padding-left: 20px; margin-bottom: 30px; display: inline-block; font-weight: bold; }
+        .team-description { color: #ffffff; max-width: 450px; margin-bottom: 30px; font-size: 1.1rem; text-shadow: 0 2px 8px rgba(0,0,0,1); font-weight: 500; }
+        .btn-join { padding: 15px 40px; border: 2px solid white; color: white; text-decoration: none; text-transform: uppercase; font-weight: bold; display: inline-block; transition: 0.3s; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .btn-join:hover { background: white; color: black; }
+
+        /* --- PARTNERS PANEL --- */
+        .partners-panel-wrapper { display: flex; justify-content: flex-end; padding-right: 2%; }
+        .partners-panel { 
+            background: rgba(10, 10, 10, 0.85); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid #333; 
+            border-right: 4px solid var(--neon-orange); 
+            padding: 30px; /* Tightened from 40px */
+            border-radius: 8px; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 500px; 
+        }
+        .panel-header { font-size: 0.9rem; color: var(--neon-blue); font-family: 'Courier New', monospace; margin-bottom: 20px; letter-spacing: 2px; }
+        
+        .title-sponsor-row { display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+        .title-sponsor-row img { height: 75px; width: auto; }
+        .sponsor-info h3 { font-size: 1.2rem; text-transform: uppercase; margin-bottom: 5px; }
+        .sponsor-info p { font-size: 0.85rem; color: #888; }
+
+        /* --- TECH GRID --- */
+        .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .tech-item { 
+            background: rgba(255,255,255,0.05); 
+            padding: 12px; 
+            border-left: 2px solid #444; 
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start; 
+            min-height: 140px; /* Compact height */
+        }
+        .tech-item:hover { border-left-color: var(--neon-blue); background: rgba(255,255,255,0.1); }
+        
+        .partner-logo { 
+            height: 85px; /* Prominent but scaled to fit desktop */
+            width: auto; 
+            max-width: 100%; 
+            margin-bottom: 8px; 
+            filter: none; 
+            opacity: 1; 
+            object-fit: contain;
+        }
+        .tech-name { font-weight: bold; font-size: 0.85rem; display: block; }
+        .tech-role { font-size: 0.65rem; color: #aaa; text-transform: uppercase; }
+
+        footer { position: absolute; bottom: 10px; width: 100%; text-align: center; color: #ccc; font-size: 0.7rem; z-index: 5; text-shadow: 0 2px 5px black; }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 900px) {
+            .dashboard-container { flex-direction: column; height: auto; padding: 120px 0 0 0; align-items: flex-start; }
+            .content-grid { grid-template-columns: 1fr; gap: 50px; width: 100%; padding: 0 20px; margin-bottom: 40px; }
+            .team-identity { align-items: center; text-align: center; padding-left: 0; display: flex; flex-direction: column; }
+            
+            /* FIXED: Logo cutoff fix */
+            .team-logo-img { max-width: 85vw; margin: 0 auto 20px auto; }
+            
+            .partners-panel-wrapper { justify-content: center; padding-right: 0; }
+            .partners-panel { text-align: left; border-right: none; border-top: 4px solid var(--neon-orange); padding: 30px 20px; }
+            footer { position: relative; bottom: auto; margin-top: auto; padding: 40px 0; background: rgba(0,0,0,0.9); }
+            .partner-logo { height: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="logo.jpg" alt="ED-XI Logo"></a>
+        <div class="nav-links">
+            <a href="shop.html">SHOP</a>
+            <a href="edxv.html">ED-XV</a>
+            <a href="science.html">SCIENCE</a>
+            <a href="data.html">DATA</a>
+            <a href="partners.html" style="color: var(--neon-orange);">TEAM</a>
+            <a href="blog.html">BLOG</a>
+            <a href="contact.html">CONTACT</a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="overlay"></div>
+
+        <div class="content-grid">
+            <div class="team-identity">
+                <img src="1000005986.png" alt="ProLapS RacerS Neon Logo" class="team-logo-img">
+                <div class="team-tagline">Factory Team /// Season 2026</div>
+                <p class="team-description">Dominating the grid with precision engineering and biological performance optimization.</p>
+                
+                <a href="mailto:prolaps@ed-xi.ca" class="btn-join">Apply to be a Sponsor</a>
+            </div>
+
+            <div class="partners-panel-wrapper">
+                <div class="partners-panel">
+                    <div class="panel-header">/// OFFICIAL PARTNER DATA</div>
+                    <div class="title-sponsor-row">
+                        <img src="logo.jpg" alt="ED-XI Logo">
+                        <div class="sponsor-info"><h3>ED-XI Performance</h3><p>Title Sponsor // Bio-Fuel Supplier</p></div>
+                    </div>
+                    
+                    <div class="tech-grid">
+                        <div class="tech-item">
+                            <img src="sponsor-1.png" alt="X-Rated" class="partner-logo">
+                            <span class="tech-name">X-Rated Performance Motors</span>
+                            <span class="tech-role">2-Stroke Specialist</span>
+                        </div>
+                        <div class="tech-item">
+                            <img src="sponsor-2.png" alt="Rare" class="partner-logo">
+                            <span class="tech-name">Robbie Arthur Racing Engines</span>
+                            <span class="tech-role">Briggs LO206 Specialist</span>
+                        </div>
+                        <div class="tech-item">
+                            <img src="sponsor-3.png" alt="Hoyne" class="partner-logo">
+                            <span class="tech-name">Hoyne Brewing</span>
+                            <span class="tech-role">Fine Beer for Fine People</span>
+                        </div>
+                        <div class="tech-item">
+                            <img src="sponsor-4.png" alt="RacelabVI" class="partner-logo">
+                            <span class="tech-name">RacelabVI</span>
+                            <span class="tech-role">TB-Kart Dealer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 ED-XI Performance Fuels. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+</body>
+</html>

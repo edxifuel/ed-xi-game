@@ -1,0 +1,201 @@
+:root {
+  --neon-pink: #FF0055;
+  --neon-blue: #00FFDD;
+  --bg-color: #050510;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none; /* No selecting text on mobile */
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  touch-action: none; /* Disables browser scrolling */
+}
+
+.grid-overlay {
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    linear-gradient(rgba(255, 0, 85, 0.2) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 0, 85, 0.2) 2px, transparent 2px);
+  background-size: 40px 40px;
+  transform: rotateX(60deg);
+  z-index: -1;
+}
+
+.screen {
+  display: none;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.screen.active {
+  display: flex;
+}
+
+#join-screen h1 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.5rem;
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue);
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 80%;
+  max-width: 300px;
+}
+
+.input-group label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  color: #aaa;
+}
+
+#room-code-input {
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-blue);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 2rem;
+  text-align: center;
+  padding: 1rem;
+  text-transform: uppercase;
+  outline: none;
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0, 255, 221, 0.2);
+}
+
+#room-code-input:focus {
+  box-shadow: inset 0 0 15px rgba(0, 255, 221, 0.5), 0 0 15px rgba(0, 255, 221, 0.5);
+}
+
+.btn {
+  display: inline-block;
+  padding: 1.2rem 2rem;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 2px solid var(--neon-pink);
+  box-shadow: inset 0 0 15px rgba(255, 0, 85, 0.5), 0 0 15px rgba(255, 0, 85, 0.5);
+  background: rgba(255, 0, 85, 0.1);
+  color: #fff;
+  transition: all 0.2s;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 300px;
+}
+
+.btn:active {
+  transform: scale(0.95);
+  background: var(--neon-pink);
+  color: #000;
+}
+
+#error-msg {
+  color: var(--neon-pink);
+  margin-top: 1rem;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  text-align: center;
+  min-height: 1rem;
+}
+
+/* GAMEPAD STYLES */
+#gamepad-screen {
+  background: radial-gradient(circle at center, #111, #000);
+}
+
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-indicator {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  box-shadow: 0 0 15px currentColor;
+  border: 2px solid white;
+}
+
+#connection-status {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.instruction {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  line-height: 2;
+  margin-bottom: 2rem;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.gas-indicator {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px dashed rgba(255,0,85, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.1s;
+  pointer-events: none; /* Let touches hit the document body */
+}
+
+.gas-indicator.active {
+  border-color: var(--neon-pink);
+  box-shadow: 0 0 30px var(--neon-pink), inset 0 0 30px var(--neon-pink);
+  background: rgba(255, 0, 85, 0.2);
+  transform: scale(1.1);
+}
+
+.pedal-icon {
+  font-family: 'Press Start 2P', cursive;
+  color: rgba(255,0,85,0.5);
+  font-size: 1.2rem;
+}
+
+.gas-indicator.active .pedal-icon {
+  color: #fff;
+  text-shadow: 0 0 10px var(--neon-pink);
+}

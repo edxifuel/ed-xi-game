@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED-XI | Secure Uplink</title>
+    
+    <style>
+        /* --- RESET & BASICS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background-color: #050505; 
+            color: #ffffff; 
+            line-height: 1.6; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            
+            /* --- FIXED: REDUCED OVERLAY OPACITY --- */
+            /* Changed from 0.8 to 0.5 so the image shows through clearly */
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('contact-bg.jpg') center/cover no-repeat;
+            background-attachment: fixed;
+        }
+        :root { --neon-orange: #FF6B00; --neon-blue: #0055FF; --carbon-dark: #111111; }
+
+        /* --- NAV --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(0, 0, 0, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon-orange); }
+
+        /* --- CONTACT CONTAINER --- */
+        .contact-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px 60px 20px;
+        }
+
+        .contact-box {
+            /* Made the box slightly more opaque so text is easy to read against the brighter background */
+            background: rgba(5, 5, 5, 0.9);
+            border: 1px solid #333;
+            border-top: 4px solid var(--neon-orange);
+            border-radius: 8px;
+            padding: 50px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .code-header {
+            font-family: 'Courier New', monospace;
+            color: var(--neon-blue);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        h2 { font-size: 1.8rem; text-transform: uppercase; margin-bottom: 5px; color: white; letter-spacing: 1px; }
+        p { color: #888; margin-bottom: 20px; font-size: 0.95rem; }
+
+        /* --- EMAIL BUTTONS --- */
+        .email-btn {
+            display: block;
+            background: #000;
+            border: 1px solid #333;
+            color: var(--neon-orange);
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            padding: 15px;
+            text-decoration: none;
+            margin-bottom: 30px;
+            transition: 0.3s;
+            font-weight: bold;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+        .email-btn:hover {
+            border-color: var(--neon-orange);
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
+            transform: scale(1.02);
+            color: #fff;
+        }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            .contact-wrapper { 
+                padding-top: 100px; 
+                align-items: flex-start;
+            }
+            
+            .contact-box { 
+                padding: 40px 20px; 
+                width: 95%;
+                max-width: 100%;
+            }
+
+            h2 { font-size: 1.4rem; }
+            
+            .email-btn { 
+                font-size: 0.95rem;
+                padding: 15px 5px;
+                margin-bottom: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="logo.jpg" alt="ED-XI Logo"></a>
+        <div class="nav-links">
+            <a href="shop.html">Shop</a>
+            <a href="edxv.html">ED-XV</a>
+            <a href="science.html">Science</a>
+            <a href="data.html">Data</a>
+            <a href="partners.html">Team</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html" style="color: var(--neon-orange);">Contact</a>
+        </div>
+    </nav>
+
+    <div class="contact-wrapper">
+        <div class="contact-box">
+            
+            <div class="code-header">/// ESTABLISH UPLINK</div>
+
+            <h2>Global Support</h2>
+            <p>Order tracking & Bio-Data reports.</p>
+            <a href="mailto:support@ed-xi.ca" class="email-btn">support@ed-xi.ca</a>
+
+            <h2>Sponsorship</h2>
+            <p>Factory Team apps (2026 Cycle).</p>
+            <a href="mailto:ProLaps@ed-xi.ca" class="email-btn">ProLaps@ed-xi.ca</a>
+
+            <h2>Wholesale</h2>
+            <p>Retail & Distribution Inquiries.</p>
+            <a href="mailto:wholesale@ed-xi.ca" class="email-btn" style="margin-bottom: 0;">wholesale@ed-xi.ca</a>
+
+        </div>
+    </div>
+
+</body>
+</html>

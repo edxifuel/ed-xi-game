@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ED-XI | The Pit Wall</title>
+    <meta name="description" content="ED-XI Mission Logs. Technical deep dives.">
+    <style>
+        /* --- RESET & BASICS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a0a; color: #ffffff; line-height: 1.6; }
+        :root { --neon-orange: #FF6B00; --neon-blue: #0055FF; --carbon-dark: #111111; --text-gray: #b0b0b0; }
+
+        /* --- NAV --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(0, 0, 0, 0.95); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #333; }
+        .logo { display: flex; align-items: center; }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--neon-orange); }
+
+        /* --- HEADER --- */
+        .blog-header { padding: 120px 5% 40px 5%; text-align: center; background: linear-gradient(to bottom, #1a1a1a, #0a0a0a); }
+        .blog-header h1 { font-size: 3rem; text-transform: uppercase; margin-bottom: 10px; }
+        .text-blue { color: var(--neon-blue); }
+        .blog-header p { color: var(--text-gray); max-width: 600px; margin: 0 auto; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+
+        /* --- BLOG GRID --- */
+        .blog-section { padding: 60px 5%; background: #0a0a0a; }
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; }
+        
+        /* CARD STYLES */
+        .blog-card { 
+            background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; 
+            transition: 0.3s; display: flex; flex-direction: column; cursor: pointer;
+        }
+        .blog-card:hover { transform: translateY(-5px); border-color: var(--neon-orange); background: #151515; }
+        .blog-card.active { 
+            border-color: var(--neon-orange); background: #1a1a1a; 
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.1); transform: scale(1.01);
+        }
+
+        .blog-img { width: 100%; height: 200px; background: #222; overflow: hidden; position: relative; }
+        .blog-content { padding: 25px; flex: 1; display: flex; flex-direction: column; }
+        
+        .blog-date { color: var(--neon-blue); font-family: 'Courier New', monospace; font-size: 0.8rem; margin-bottom: 10px; display: block; }
+        .blog-title { font-size: 1.4rem; text-transform: uppercase; margin-bottom: 10px; color: white; line-height: 1.2; }
+        .blog-excerpt { color: #aaa; font-size: 0.95rem; margin-bottom: 20px; }
+        .tags { margin-bottom: 15px; }
+        .tag { display: inline-block; font-size: 0.7rem; background: #222; padding: 2px 8px; border-radius: 4px; margin-right: 5px; color: #888; border: 1px solid #333; }
+        
+        .btn-read { 
+            color: var(--neon-orange); font-weight: bold; text-transform: uppercase; 
+            font-size: 0.9rem; letter-spacing: 1px; border: none; background: none; padding: 0; margin-top: auto;
+        }
+        .blog-card.active .btn-read { display: none; }
+
+        /* HIDDEN CONTENT */
+        .blog-deep-dive {
+            max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s ease;
+            text-align: left; border-top: 1px solid #333;
+            padding-top: 0; margin-top: 0; color: #ccc; font-size: 0.9rem; line-height: 1.7;
+        }
+        .blog-card.active .blog-deep-dive { max-height: 1200px; opacity: 1; padding-top: 20px; margin-top: 20px; }
+        
+        .blog-deep-dive h3 { color: white; font-size: 1.1rem; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; border-left: 3px solid var(--neon-orange); padding-left: 10px; }
+        .blog-deep-dive p { margin-bottom: 15px; }
+        .blog-meta { color: #555; font-size: 0.75rem; font-family: monospace; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 15px; display: block; }
+
+        footer { background: black; padding: 40px; text-align: center; border-top: 1px solid #222; color: #555; }
+    </style>
+</head>
+<body>
+
+   <nav>
+    <a href="index.html" class="logo"><img src="logo.jpg" alt="ED-XI Logo"></a>
+    <div class="nav-links">
+        <a href="shop.html">Shop</a>
+        <a href="edxv.html">ED-XV</a>
+        <a href="science.html">Science</a>
+        <a href="data.html">Data</a>
+        <a href="partners.html">Team</a>
+        <a href="blog.html" style="color: var(--neon-orange);">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="game.html" style="color: var(--neon-orange);">RACING GAME</a>
+    </div>
+</nav>
+
+    <header class="blog-header">
+        <h1>The Pit <span class="text-blue">Wall</span></h1>
+        <p>MISSION LOGS /// TECHNICAL DATA /// RACE REPORTS</p>
+    </header>
+
+    <section class="blog-section">
+        <div class="blog-grid">
+            
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('recovery-flush.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.05.02</span>
+                    <h3 class="blog-title">Recovery Protocols: The "Flush" Phase</h3>
+                    <div class="tags"><span class="tag">RECOVERY</span></div>
+                    <p class="blog-excerpt">The race doesn't end at the checkered flag. If you park the car hot, the fluids boil. Your body is the same.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+                    
+                    <div class="blog-deep-dive">
+                        <h3>The "Flush" Phase</h3>
+                        <p>Immediately after high exertion, your muscles are full of lactic acid. Restricted blood flow traps that acid, leading to soreness and stiffness.</p>
+                        <h3>The XI-Matrix Advantage</h3>
+                        <p>By maintaining higher nitric oxide levels post-activity, you keep the vascular pathways open. This allows your body to "flush" the toxins out efficiently.</p>
+                        <p style="color: var(--neon-orange);"><strong>Whether that's for the next heat, or the night shift.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('driver-focus.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.04.22</span>
+                    <h3 class="blog-title">Focus Fatigue: The Maca Advantage</h3>
+                    <div class="tags"><span class="tag">PSYCHOLOGY</span></div>
+                    <p class="blog-excerpt">At lap 20, your arms might be tired, but your brain is exhausted. Decision fatigue is why drivers miss braking points.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+
+                    <div class="blog-deep-dive">
+                        <h3>Adaptogen vs. Stimulant</h3>
+                        <p>Peruvian Maca is an adaptogen. Unlike caffeine, which just whips your central nervous system into a frenzy, adaptogens help your body manage cortisol.</p>
+                        <h3>The Application</h3>
+                        <p>ED-XI uses Maca to keep your mind calm while your body performs at the limit. This applies equally to high-pressure situations on the track and... intimate situations where anxiety can kill the mood.</p>
+                        <p style="color: var(--neon-orange);"><strong>Don't let your mind race when you need to be in the moment. Stay locked in.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('grip-strength.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.03.25</span>
+                    <h3 class="blog-title">Performance Physics: Why You’re Losing Grip</h3>
+                    <div class="tags"><span class="tag">BIOLOGY</span></div>
+                    <p class="blog-excerpt">You spend thousands on tires, but the most important machine is the driver. If your body fails, the setup doesn't matter.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+
+                    <div class="blog-deep-dive">
+                        <span class="blog-meta">AUTHOR: TEAM ED-XI | READ TIME: 3 MIN</span>
+                        <h3>The Science of "Pump"</h3>
+                        <p>In racing, "arm pump" is the enemy. It happens when tight muscles constrict blood flow. You fade in the last 5 laps. You miss the apex. You lose.</p>
+                        <p><em>"The solution isn't just training harder. It's biology. It's Nitric Oxide."</em></p>
+                        <p>Your body produces Nitric Oxide naturally to widen blood vessels—vasodilation. More flow equals less fatigue.</p>
+                        <h3>The "Other" Finish Line</h3>
+                        <p>Here is the part most racing brands won't tell you: That same biological mechanic—vasodilation—is exactly what powers your performance in the bedroom.</p>
+                        <h3>Enter The XI-Protocol</h3>
+                        <p>We didn't build an energy drink. We built a flow optimizer. Loaded with Beet Root nitrates and Peruvian Maca, ED-XI is designed to keep your fuel lines open.</p>
+                        <p style="color: var(--neon-orange);"><strong>Whether you're holding onto a steering wheel at 60mph or holding onto a moment late at night, grip is everything. Don't slip.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('fuel-injection.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.04.10</span>
+                    <h3 class="blog-title">Natural Nitrous: Fuel Injection for Blood</h3>
+                    <div class="tags"><span class="tag">CHEMISTRY</span></div>
+                    <p class="blog-excerpt">Think of your bloodstream like a fuel injection system. Synthetic energy drinks are like dumping cheap additives into the tank.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+
+                    <div class="blog-deep-dive">
+                        <h3>Beet Root Extract</h3>
+                        <p>Contains high levels of dietary nitrates. When ingested, your body converts these into Nitric Oxide.</p>
+                        <p>This isn't a stimulant; it's a mechanical advantage. It relaxes the smooth muscle cells lining your arteries, widening the "pipes." The result? You deliver more oxygen to your working muscles without your heart having to pump faster.</p>
+                        <p style="color: var(--neon-orange);"><strong>It is literal, biological forced induction. If you want maximum horsepower, you need maximum pressure. In every cylinder.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('acid-warning.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.03.20</span>
+                    <h3 class="blog-title">The "Acid-Caffeine" Loop</h3>
+                    <div class="tags"><span class="tag">PHYSIOLOGY</span></div>
+                    <p class="blog-excerpt">Most energy drinks have a pH of 2.5—battery acid. This triggers a cortisol spike and crash.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+
+                    <div class="blog-deep-dive">
+                        <h3>The Biological Cost</h3>
+                        <p>This triggers a "fight or flight" response, spiking cortisol levels. While this makes you feel "awake," it is stress-based wakefulness.</p>
+                        <h3>The Solution</h3>
+                        <p>ED-XI is buffered to pH 6.0 using Malic Acid. High acidity kills testosterone and ruins the mood.</p>
+                        <p style="color: var(--neon-orange);"><strong>Don't let a cheap energy drink crash your system right when you need to perform. Keep your pH balanced to stay in the game.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('neon-spinach.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.03.12</span>
+                    <h3 class="blog-title">Red Spinach vs. Beets</h3>
+                    <div class="tags"><span class="tag">INGREDIENTS</span></div>
+                    <p class="blog-excerpt">Red Spinach Extract contains 4x the nitrate concentration of beets. Cleaner, faster activation.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+
+                    <div class="blog-deep-dive">
+                        <h3>Why Beets Fail</h3>
+                        <p>Beetroot extract requires a massive dosage to be effective. It's heavy and slow.</p>
+                        <h3>The Spinach Advantage</h3>
+                        <p>We source a premium Red Spinach Extract (Amaranthus dubius) which contains <strong>4x the nitrate concentration</strong> of beet extract by weight.</p>
+                        <p style="color: var(--neon-orange);"><strong>This ensures maximum vascularity with zero lag. Veins equate to flow. Flow equates to function. You do the math.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" onclick="toggleCard(this)">
+                <div class="blog-img" style="background: url('zen-focus.jpg') center/cover;"></div>
+                <div class="blog-content">
+                    <span class="blog-date">LOG_DATE: 2024.02.28</span>
+                    <h3 class="blog-title">Stress is Slow</h3>
+                    <div class="tags"><span class="tag">RECOVERY</span></div>
+                    <p class="blog-excerpt">High cortisol kills testosterone. KSM-66 Ashwagandha lowers cortisol by 27%.</p>
+                    <span class="btn-read">[ CLICK TO EXPAND ]</span>
+
+                    <div class="blog-deep-dive">
+                        <h3>KSM-66 Ashwagandha</h3>
+                        <p>Clinical studies show KSM-66 reduces serum cortisol levels by 27.9%. This keeps your mind calm while your body performs at the limit.</p>
+                        <h3>Cortisol is the Enemy of Drive</h3>
+                        <p>High stress physically prevents your body from shifting gears into intimacy. If you are stressed, you are shut down.</p>
+                        <p style="color: var(--neon-orange);"><strong>Clear the cortisol. Reclaim the drive.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 ED-XI Performance Fuels. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function toggleCard(card) {
+            document.querySelectorAll('.blog-card').forEach(c => {
+                if (c !== card) c.classList.remove('active');
+            });
+            card.classList.toggle('active');
+        }
+    </script>
+
+</body>
+</html>

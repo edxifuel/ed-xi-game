@@ -1,0 +1,111 @@
+:root {
+  --bg-color: #050510;
+  --neon-cyan: #00FFDD;
+  --neon-pink: #FF0055;
+  --grid-color: rgba(255, 0, 85, 0.2);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: white;
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+canvas {
+  display: block;
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+#ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+  padding: 2rem;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+#room-info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--neon-cyan);
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(0, 255, 221, 0.4);
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+#room-info h3 {
+  font-size: 1rem;
+  color: #aaa;
+  margin-bottom: 0.5rem;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#room-code-display {
+  font-size: 3.5rem;
+  font-family: 'Press Start 2P', cursive;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+  letter-spacing: 5px;
+  margin-bottom: 1rem;
+}
+
+#qr-code {
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+#player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.player-token {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+}
+
+.color-box {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
