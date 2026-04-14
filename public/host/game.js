@@ -967,6 +967,41 @@ function updatePhysics() {
     if (p.y < -30) p.y = canvas.height + 30;
     if (p.y > canvas.height + 30) p.y = -30;
   });
+
+  // ── Kart-to-Kart Collision ────────────────────────────────────────────────
+  // Circle collision, radius 18px per kart. Pushes apart and exchanges
+  // velocity so karts can't drive through each other.
+  const kartList = Object.values(players);
+  const KART_RADIUS = 18;
+  for (let i = 0; i < kartList.length; i++) {
+    for (let j = i + 1; j < kartList.length; j++) {
+      const a = kartList[i];
+      const b = kartList[j];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy);
+      const minDist = KART_RADIUS * 2;
+      if (dist < minDist && dist > 0.001) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        // Push both karts apart equally
+        const overlap = (minDist - dist) / 2;
+        a.x -= nx * overlap;
+        a.y -= ny * overlap;
+        b.x += nx * overlap;
+        b.y += ny * overlap;
+        // Exchange velocity along collision normal (bouncy bump)
+        const relVelN = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+        if (relVelN > 0) {
+          const impulse = relVelN * 0.55;
+          a.vx -= impulse * nx;
+          a.vy -= impulse * ny;
+          b.vx += impulse * nx;
+          b.vy += impulse * ny;
+        }
+      }
+    }
+  }
 }
 
 function drawCars() {
@@ -979,29 +1014,36 @@ function drawCars() {
     ctx.shadowBlur = 18;
     ctx.shadowColor = p.color;
 
-    // ── Four Wheels ──────────────────────────────────────────────────────────
-    // Wheels are drawn first so body renders on top
+    // ── Wheels ────────────────────────────────────────────────────────────────
+    // Formula layout: wide rear track, narrow front track
     ctx.fillStyle = '#222';
     ctx.strokeStyle = p.color;
     ctx.lineWidth = 1.5;
     const wheels = [
-      { x:  12, y: -11 }, // front-right
-      { x:  12, y:  11 }, // front-left
-      { x: -12, y: -11 }, // rear-right
-      { x: -12, y:  11 }, // rear-left
+      { x:  14, y:  -7 }, // front-right (narrower)
+      { x:  14, y:   7 }, // front-left  (narrower)
+      { x: -13, y: -12 }, // rear-right  (wider)
+      { x: -13, y:  12 }, // rear-left   (wider)
     ];
-    wheels.forEach(w => {
+    // Front wheels are thinner, rear wheels are fatter
+    wheels.forEach((w, i) => {
+      const isRear = i >= 2;
       ctx.beginPath();
-      ctx.roundRect(w.x - 5, w.y - 3, 10, 6, 1);
+      ctx.roundRect(w.x - (isRear ? 6 : 4), w.y - (isRear ? 4 : 3), isRear ? 12 : 8, isRear ? 8 : 6, 1);
       ctx.fill();
       ctx.stroke();
     });
 
-    // ── Kart Body ─────────────────────────────────────────────────────────────
+    // ── Formula Body (tapered — wide at rear, narrow at nose) ─────────────────
     ctx.fillStyle = p.color;
     ctx.globalAlpha = 0.25;
     ctx.beginPath();
-    ctx.roundRect(-16, -9, 32, 18, 4);
+    // Draw a trapezoid: rear is wide, front is narrow
+    ctx.moveTo(-16, -10); // rear-left
+    ctx.lineTo(-16,  10); // rear-right
+    ctx.lineTo( 16,   6); // front-right (narrower)
+    ctx.lineTo( 16,  -6); // front-left  (narrower)
+    ctx.closePath();
     ctx.fill();
     ctx.globalAlpha = 1.0;
 
@@ -1009,16 +1051,26 @@ function drawCars() {
     ctx.strokeStyle = p.color;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(-16, -9, 32, 18, 4);
+    ctx.moveTo(-16, -10);
+    ctx.lineTo(-16,  10);
+    ctx.lineTo( 16,   6);
+    ctx.lineTo( 16,  -6);
+    ctx.closePath();
     ctx.stroke();
 
-    // Nose cone (forward triangular point)
+    // Nose cone — sharp pointed front
     ctx.fillStyle = p.color;
     ctx.beginPath();
-    ctx.moveTo(16, -6);
-    ctx.lineTo(24, 0);
-    ctx.lineTo(16,  6);
+    ctx.moveTo(16, -5);
+    ctx.lineTo(26,  0);
+    ctx.lineTo(16,  5);
     ctx.closePath();
+    ctx.fill();
+
+    // Rear wing bar
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.roundRect(-18, -11, 4, 22, 1);
     ctx.fill();
 
     // ── Cockpit / Helmet ─────────────────────────────────────────────────────
@@ -1026,26 +1078,17 @@ function drawCars() {
     ctx.strokeStyle = 'rgba(255,255,255,0.4)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.ellipse(0, 0, 7, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(2, 0, 6, 4, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-
-    // ── Headlights ───────────────────────────────────────────────────────────
-    ctx.fillStyle = '#ffffaa';
-    ctx.shadowColor = '#ffffaa';
-    ctx.shadowBlur = 8;
-    ctx.beginPath(); ctx.arc(18, -5, 2.5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(18,  5, 2.5, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 18;
-    ctx.shadowColor = p.color;
 
     // ── Brake Lights ─────────────────────────────────────────────────────────
     if (p.gas === -1) {
       ctx.fillStyle = '#ff2222';
       ctx.shadowColor = '#ff2222';
       ctx.shadowBlur = 20;
-      ctx.beginPath(); ctx.arc(-17, -6, 3.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(-17,  6, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-17, -7, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-17,  7, 3, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 18;
       ctx.shadowColor = p.color;
     }
@@ -1058,12 +1101,12 @@ function drawCars() {
       ctx.lineWidth = 3;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(-16, -3);
-      ctx.lineTo(-16 - 8 - Math.random() * 10, -3 + (Math.random() - 0.5) * 4);
+      ctx.moveTo(-16, -5);
+      ctx.lineTo(-16 - 7 - Math.random() * 9, -5 + (Math.random() - 0.5) * 4);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(-16,  3);
-      ctx.lineTo(-16 - 8 - Math.random() * 10,  3 + (Math.random() - 0.5) * 4);
+      ctx.moveTo(-16,  5);
+      ctx.lineTo(-16 - 7 - Math.random() * 9,  5 + (Math.random() - 0.5) * 4);
       ctx.stroke();
     }
 
