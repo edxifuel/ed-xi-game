@@ -208,44 +208,47 @@ brakePedal.addEventListener('mouseup', (e) => {
 });
 
 // Tilt for Steering
-let steerOffset = 0;       // calibration zero-point (set on first touch)
-let calibrated = false;
-let smoothedSteer = 0;     // low-pass filtered steer value
+let steerOffset = null;    // calibrated neutral beta angle
+let smoothedSteer = 0;     // low-pass filtered output
 
 function handleOrientation(event) {
   if (!isConnected) return;
 
-  // gamma = left/right tilt of the phone = correct axis for steering in landscape
-  // It ranges -90 (full left) to +90 (full right).
-  // landscape-secondary (upside-down landscape) flips the sign.
-  let rawGamma = event.gamma ?? 0;
+  // In landscape orientation, LEFT/RIGHT tilt = event.beta (not gamma).
+  // Beta ranges -180 to 180. When held upright in landscape, beta ≈ 90.
+  // landscape-secondary (USB port on right) flips the sign.
+  let rawBeta = event.beta ?? 90;
 
   const orientType = (screen.orientation || {}).type || '';
   if (orientType === 'landscape-secondary') {
-    rawGamma = -rawGamma;
+    rawBeta = -rawBeta;
   }
 
-  // Auto-calibrate on first reading so the kart goes straight at the player's
-  // natural resting hold angle.
-  if (!calibrated) {
-    steerOffset = rawGamma;
-    calibrated = true;
+  // Calibrate neutral on first reading so whatever angle the player
+  // naturally holds the phone = straight ahead.
+  if (steerOffset === null) {
+    steerOffset = rawBeta;
   }
 
-  const tilt = rawGamma - steerOffset;
+  let tilt = rawBeta - steerOffset;
 
-  // Dead zone: ignore tiny wobble within ±4 degrees
-  const DEAD_ZONE = 4;
-  const STEER_RANGE = 35; // degrees of tilt for full lock
+  // Fix wrap-around: if delta jumps > 180 degrees it crossed the ±180 boundary.
+  // Clamp it so the kart never sees a sudden 180 flip.
+  if (tilt > 90)  tilt = 90;
+  if (tilt < -90) tilt = -90;
+
+  // Dead zone: ignore ±5° of natural hand wobble
+  const DEAD_ZONE = 5;
+  const STEER_RANGE = 30; // degrees of tilt = full lock
 
   let raw = 0;
   if (Math.abs(tilt) > DEAD_ZONE) {
     raw = (tilt - Math.sign(tilt) * DEAD_ZONE) / STEER_RANGE;
-    raw = Math.max(-1, Math.min(1, raw)); // clamp to [-1, 1]
+    raw = Math.max(-1, Math.min(1, raw));
   }
 
-  // Low-pass filter: smooths jitter without adding lag
-  smoothedSteer = smoothedSteer * 0.6 + raw * 0.4;
+  // Low-pass filter: smooths sensor jitter without adding lag
+  smoothedSteer = smoothedSteer * 0.5 + raw * 0.5;
   padSteer = smoothedSteer;
 
   // Animate Steering Wheel
@@ -255,10 +258,10 @@ function handleOrientation(event) {
   }
 }
 
-// Re-calibrate when the player taps the screen to set neutral
+// Any tap re-calibrates neutral so players can adjust their grip mid-game
 document.addEventListener('touchstart', () => {
-  calibrated = false;
-}, { once: false, passive: true });
+  steerOffset = null;
+}, { passive: true });
 
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
