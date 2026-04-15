@@ -931,19 +931,15 @@ function updatePhysics() {
       // THE HARD LOCK: If the car is barely moving, completely ignore steering.
       if (currentSpeed > 0.2) {
 
-          // Ramp from 0 → full authority as speed reaches 2.0 (typical racing speed)
+          // Ramp from 0 → full authority as speed reaches 2.0
           const lowSpeedFactor = Math.min(currentSpeed / 2.0, 1.0);
 
-          // Keeps high-speed stability
-          const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
-
-          // Square the input to give a heavy center and sharp edges
+          // Square the input: heavy center, sharp edges
           const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
 
-          // Player phone delta
-          const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+          const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor;
 
-          // MAX_DELTA now matches bots so corners feel equally snappy
+          // MAX_DELTA matches bots, reduced on grass
           const MAX_DELTA = onGrassRestricted ? 0.015 : 0.070;
 
           p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
@@ -1015,9 +1011,10 @@ function updatePhysics() {
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
       // Tier 1 = 18%, Tier 2 = 23%, Tier 3 = 28%, Tier 4 = 33%
-      // Hard cutoff: zero draft below speed 1.5, ramps to full at speed 3.0
-      const DRAFT_MIN = 1.5;
-      const DRAFT_MAX = 3.0;
+      // Hard cutoff: zero draft below speed 0.8, ramps to full at speed 1.3
+      // Recalibrated for new lower terminal velocity (~1.57)
+      const DRAFT_MIN = 0.8;
+      const DRAFT_MAX = 1.3;
       const draftSpeedFactor = currentSpeed < DRAFT_MIN ? 0
         : Math.min((currentSpeed - DRAFT_MIN) / (DRAFT_MAX - DRAFT_MIN), 1.0);
       const boostAmount = 0.13 + (0.05 * p.draftTier);
