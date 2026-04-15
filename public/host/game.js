@@ -918,7 +918,7 @@ function updatePhysics() {
       if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
 
       // How fast the virtual driver can crank the steering wheel
-      const WHEEL_TURN_SPEED = 0.01; 
+      const WHEEL_TURN_SPEED = 0.005; 
 
       if (p.steer === -1) {
           // Steer Left Linearly
