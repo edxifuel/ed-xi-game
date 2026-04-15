@@ -194,11 +194,10 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-// Tuned down engine power and steering to emulate the slower, "heavier" feel
-// that was present when the double-resolution bug was halving relative speeds.
-const ENGINE_POWER = 0.016; // Was 0.024
+// Increased speeds by 50% for faster gameplay
+const ENGINE_POWER = 0.024;
 const FRICTION = 0.985;
-const TURN_SPEED = 0.054; // Was 0.072
+const TURN_SPEED = 0.081;
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
