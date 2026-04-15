@@ -947,49 +947,66 @@ function updatePhysics() {
     }
 
     // ── Drafting Physics ──────────────────────────────────────────────────────
-    let pDraftTier = 0;
-    const DRAFT_RANGE = 200; // About 2 kart lengths
-    const DRAFT_ANGLE_TOLERANCE = 0.4; // roughly 22 degrees
+    // Two-pass detection so tier cascades work regardless of player process order:
+    // Pass 1: find which kart (if any) is directly in front of us — fresh each frame.
+    // Pass 2 (outside forEach) propagates the chain up to 4 tiers deep.
+    const DRAFT_RANGE = 250;          // pixels — ~2.5 kart lengths
+    const DRAFT_ANGLE_TOL = 0.45;     // ~26 degrees — cone behind the lead kart
+    const DRAFT_HEADING_TOL = 0.65;   // ~37 degrees — both karts going same way
+
+    let directLeader = null; // The one kart immediately ahead of us
+    let bestDist = Infinity;
 
     Object.values(players).forEach(other => {
       if (other.id === p.id) return;
-      
-      // Basic distance check
+      if (Math.hypot(other.vx, other.vy) < 0.8) return; // leader must be moving
+
       const dx = other.x - p.x;
       const dy = other.y - p.y;
       const distSq = dx*dx + dy*dy;
-      
-      if (distSq < DRAFT_RANGE * DRAFT_RANGE && distSq > 400) {
-        // Calculate angle TO the other kart
-        const angleToOther = Math.atan2(dy, dx);
-        
-        // Are we pointing roughly at the other kart?
-        let angleDiff = angleToOther - p.angle;
-        while (angleDiff <= -Math.PI) angleDiff += Math.PI * 2;
-        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-        
-        // Is the other kart also pointing roughly the same way?
-        let headingDiff = other.angle - p.angle;
-        while (headingDiff <= -Math.PI) headingDiff += Math.PI * 2;
-        while (headingDiff > Math.PI) headingDiff -= Math.PI * 2;
+      if (distSq > DRAFT_RANGE * DRAFT_RANGE || distSq < 400) return;
 
-        if (Math.abs(angleDiff) < DRAFT_ANGLE_TOLERANCE && Math.abs(headingDiff) < Math.PI / 4) {
-           // Let's also check if they are going fast enough to create a draft
-           if (Math.hypot(other.vx, other.vy) > 1.0) {
-             const theirTier = other.draftTier || 0;
-             pDraftTier = Math.max(pDraftTier, theirTier + 1);
-           }
-        }
+      // Angle from US to OTHER — must be roughly our forward direction
+      const angleToOther = Math.atan2(dy, dx);
+      let angleDiff = angleToOther - p.angle;
+      while (angleDiff <= -Math.PI) angleDiff += Math.PI * 2;
+      while (angleDiff >  Math.PI) angleDiff -= Math.PI * 2;
+      if (Math.abs(angleDiff) > DRAFT_ANGLE_TOL) return;
+
+      // Both karts must be heading roughly the same direction
+      let headingDiff = other.angle - p.angle;
+      while (headingDiff <= -Math.PI) headingDiff += Math.PI * 2;
+      while (headingDiff >  Math.PI) headingDiff -= Math.PI * 2;
+      if (Math.abs(headingDiff) > DRAFT_HEADING_TOL) return;
+
+      // Pick the closest qualifying kart
+      if (distSq < bestDist) {
+        bestDist = distSq;
+        directLeader = other;
       }
     });
-    p.draftTier = pDraftTier;
-    p.isDrafting = pDraftTier > 0;
+
+    // Walk the chain: leader -> leader's leader -> ... (max 4 deep)
+    let pDraftTier = 0;
+    if (directLeader) {
+      pDraftTier = 1;
+      let cursor = directLeader;
+      for (let chain = 0; chain < 3; chain++) {
+        if (!cursor._draftLeader) break;
+        pDraftTier++;
+        cursor = cursor._draftLeader;
+      }
+    }
+
+    p._draftLeader = directLeader; // store for next-frame chain walking
+    p.draftTier   = pDraftTier;
+    p.isDrafting  = pDraftTier > 0;
 
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
-      // Base boost of 20%, adding +5% for each kart in the train ahead of us!
+      // Tier 1 = 25%, Tier 2 = 30%, Tier 3 = 35%, Tier 4 = 40%
       const boostAmount = 0.20 + (0.05 * p.draftTier);
-      const cappedBoost = Math.min(boostAmount, 0.40); // Cap at 40% extra power
+      const cappedBoost = Math.min(boostAmount, 0.40);
       currentPower = ENGINE_POWER * (1 + cappedBoost);
     }
 
