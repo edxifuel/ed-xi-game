@@ -237,24 +237,15 @@ function handleOrientation(event) {
   if (tilt > 90)  tilt = 90;
   if (tilt < -90) tilt = -90;
 
-  // Dead zone: ignore ±5° of natural hand wobble
-  const DEAD_ZONE = 5;
-  const STEER_RANGE = 25; // degrees of tilt for full lock (tighter = more natural feel)
+  // The Game Host now handles deadzones, normalizing, and smoothing!
+  // Send the raw tilt directly to the host.
+  padSteer = tilt;
 
-  let raw = 0;
-  if (Math.abs(tilt) > DEAD_ZONE) {
-    raw = (tilt - Math.sign(tilt) * DEAD_ZONE) / STEER_RANGE;
-    raw = Math.max(-1, Math.min(1, raw));
-  }
-
-  // Low-pass filter: just enough to kill sensor jitter, not slow the response
-  smoothedSteer = smoothedSteer * 0.25 + raw * 0.75;
-  padSteer = smoothedSteer;
-
-  // Animate Steering Wheel
+  // Animate Steering Wheel (tilt is around +/- 40 for full lock, adapt visually)
   const wheel = document.getElementById('steering-wheel');
   if (wheel) {
-    wheel.style.transform = `rotate(${padSteer * 120}deg)`;
+    const visualSteer = Math.max(-1.0, Math.min(1.0, tilt / 40.0));
+    wheel.style.transform = `rotate(${visualSteer * 120}deg)`;
   }
 }
 
@@ -264,8 +255,8 @@ function handleOrientation(event) {
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
   if (!isConnected) return;
-  if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = -1;
-  if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 1;
+  if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = -40; // Max left in degrees
+  if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 40; // Max right in degrees
   if (e.key === 'ArrowUp' || e.key === 'w') {
     padGas = 1;
     gasPedal.classList.add('active');

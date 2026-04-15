@@ -912,8 +912,27 @@ function updatePhysics() {
       // Less aggressive reduction. Even at max speed, they keep 50% steering.
       const highSpeedFactor = Math.max(0.5, 1 - (currentSpeed * 0.08));
 
-      // Clamp max heading change per frame
-      const rawDelta = p.steer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+      // ── GYRO PRE-PROCESSING & NORMALIZATION ───────────────────────────────────
+
+      // Let's assume p.steer is a raw degree from the phone (e.g., -45 to 45).
+      // 1. NORMALIZE: We divide by 40 so that tilting the phone 40 degrees = 100% steering.
+      let normalizedSteer = p.steer / 40.0;
+
+      // 2. CLAMP: Prevent it from going past -1 or 1, even if they flip the phone completely sideways.
+      normalizedSteer = Math.max(-1.0, Math.min(1.0, normalizedSteer));
+
+      // 3. DEADZONE: Ignore tiny hand shakes (under 15% of max tilt).
+      if (Math.abs(normalizedSteer) < 0.15) {
+          normalizedSteer = 0;
+      }
+
+      // 4. LOW-PASS FILTER: Smooth the input to act like a heavy steering column.
+      // (Make sure p.smoothedSteer is initialized to 0 in your car setup object!)
+      if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
+      p.smoothedSteer = (p.smoothedSteer * 0.80) + (normalizedSteer * 0.20);
+
+      // Now, use p.smoothedSteer for your physics instead of p.steer!
+      const rawDelta = p.smoothedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
       const MAX_DELTA = 0.038;
       p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       // ── End Steering ──────────────────────────────────────────────────────
