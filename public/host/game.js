@@ -854,6 +854,21 @@ function updatePhysics() {
   const avgSpeed = humanCount > 0 ? Math.max(totalHumanSpeed / humanCount, 1.0) : 1.5; 
   const waypoints = getWaypoints();
 
+  // ── Calculate Race Positions (Rubber-banding) ─────────────────────────────
+  Object.values(players).forEach(p => {
+      let wp = waypoints[p.targetWaypoint];
+      let dx = wp.x - p.x;
+      let dy = wp.y - p.y;
+      p.distToWp = Math.hypot(dx, dy);
+      p.raceScore = ((p.lapsCompleted || 0) * 1000000) + (p.targetWaypoint * 10000) - p.distToWp;
+  });
+
+  const sortedIds = Object.keys(players).sort((a, b) => players[b].raceScore - players[a].raceScore);
+  const totalRacers = sortedIds.length;
+  sortedIds.forEach((pid, index) => {
+     players[pid].raceRank = index + 1; // 1st, 2nd, 3rd...
+  });
+
   Object.entries(players).forEach(([pid, p]) => {
     
     // Universal Lap Tracker (Humans and Bots)
@@ -1026,6 +1041,14 @@ function updatePhysics() {
       p.draftBoostPct = Math.round(cappedBoost * draftSpeedFactor * 100); // store for label
     } else {
       p.draftBoostPct = 0;
+    }
+
+    // Catch-up Rubber-banding
+    if (totalRacers > 1 && p.raceRank > 1) {
+        // Boost starts at 0% for 1st place and scales to 15% for Last Place
+        const rankRatio = (p.raceRank - 1) / (totalRacers - 1);
+        const maxCatchUpBoost = 0.15; // 15% extra engine power
+        currentPower *= (1 + (rankRatio * maxCatchUpBoost));
     }
 
     if (p.gas === 1) {
