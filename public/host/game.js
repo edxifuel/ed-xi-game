@@ -923,7 +923,7 @@ function updatePhysics() {
     }
 
     // ── Drafting Physics ──────────────────────────────────────────────────────
-    let isDrafting = false;
+    let pDraftTier = 0;
     const DRAFT_RANGE = 200; // About 2 kart lengths
     const DRAFT_ANGLE_TOLERANCE = 0.4; // roughly 22 degrees
 
@@ -952,16 +952,21 @@ function updatePhysics() {
         if (Math.abs(angleDiff) < DRAFT_ANGLE_TOLERANCE && Math.abs(headingDiff) < Math.PI / 4) {
            // Let's also check if they are going fast enough to create a draft
            if (Math.hypot(other.vx, other.vy) > 1.0) {
-             isDrafting = true;
+             const theirTier = other.draftTier || 0;
+             pDraftTier = Math.max(pDraftTier, theirTier + 1);
            }
         }
       }
     });
-    p.isDrafting = isDrafting;
+    p.draftTier = pDraftTier;
+    p.isDrafting = pDraftTier > 0;
 
     let currentPower = ENGINE_POWER;
-    if (p.isDrafting) {
-      currentPower = ENGINE_POWER * 1.35; // 35% speed boost when drafting!
+    if (p.draftTier > 0) {
+      // Base boost of 30%, adding +10% for each kart in the train ahead of us!
+      const boostAmount = 0.30 + (0.10 * p.draftTier);
+      const cappedBoost = Math.min(boostAmount, 0.65); // Cap at 65% extra power
+      currentPower = ENGINE_POWER * (1 + cappedBoost);
     }
 
     if (p.gas === 1) {
