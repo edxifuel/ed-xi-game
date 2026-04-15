@@ -129,7 +129,6 @@ socket.on('raceStart', (settings) => {
   waitScreen.classList.remove('active');
   gamepadScreen.classList.add('active');
   
-  window.addEventListener('deviceorientation', handleOrientation);
   setInterval(sendInput, 1000 / 20); 
 });
 
