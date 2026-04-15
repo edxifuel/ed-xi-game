@@ -912,46 +912,44 @@ function updatePhysics() {
     if (p.grassTimer > 0) p.grassTimer--; // count down every frame
 
     if (!p.isBot) {
-      // ── TOUCH PRE-PROCESSING (Virtual Steering Column) ───────────────────────
+        // ── 1. GYRO SANITIZER ─────────────────────────────────────────────────────
+        // Assume p.steer is the calibrated raw degree from the phone
 
-      // p.steer comes from the phone as exactly -1, 0, or 1.
-      if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
+        // Normalize it: 40 degrees of physical tilt = 100% steering lock
+        let normalizedSteer = p.steer / 40.0;
+        normalizedSteer = Math.max(-1.0, Math.min(1.0, normalizedSteer)); // Clamp it
 
-      // How fast the virtual driver can crank the steering wheel
-      const WHEEL_TURN_SPEED = 0.005; 
+        // The Deadzone: Ignore tiny natural hand tremors
+        if (Math.abs(normalizedSteer) < 0.15) {
+            normalizedSteer = 0;
+        }
 
-      if (p.steer === -1) {
-          // Steer Left Linearly
-          p.smoothedSteer = Math.max(-1.0, p.smoothedSteer - WHEEL_TURN_SPEED);
-      } else if (p.steer === 1) {
-          // Steer Right Linearly
-          p.smoothedSteer = Math.min(1.0, p.smoothedSteer + WHEEL_TURN_SPEED);
-      } else {
-          // Return to center AGGRESSIVELY. If this is too slow, the car feels floaty/twitchy.
-          p.smoothedSteer *= 0.50; 
-          if (Math.abs(p.smoothedSteer) < 0.05) p.smoothedSteer = 0; // Snap to absolute 0
-      }
+        // Low-Pass Filter: Smooth out the steering column
+        if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
+        p.smoothedSteer = (p.smoothedSteer * 0.80) + (normalizedSteer * 0.20);
 
-      // ── 2. APPLY TO YOUR PHYSICS ──────────────────────────────────────────
 
-      // THE HARD LOCK: If the car is barely moving, completely ignore steering.
-      if (currentSpeed > 0.2) {
-          // Less extremes: 0.5x at stop, maxing at 1.0x at top speed (1.57)
-          const speedSensitivity = Math.min(0.5 + (currentSpeed * 0.35), 1.0);
+        // ── 2. STEERING PHYSICS ───────────────────────────────────────────────────
+        
+        // Hard lock: Must be rolling to turn the wheels
+        if (currentSpeed > 0.2) { 
+            const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0); 
+            const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
 
-          const rawDelta = p.smoothedSteer * TURN_SPEED * speedSensitivity;
+            // Square the input so the center is steady, but hard tilts turn sharp
+            const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
 
-          // MAX_DELTA matches bots, reduced on grass
-          const MAX_DELTA = onGrassRestricted ? 0.015 : 0.070;
-
-          p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
-      }
-      // ── End Steering ──────────────────────────────────────────────────────
+            const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+            
+            const MAX_DELTA = onGrassRestricted ? 0.015 : 0.055; 
+            
+            p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
+        }
     } else {
-      // AI: turn toward waypoint, but cap per-frame delta to prevent spin-outs
-      const botDelta = p.steer * TURN_SPEED;
-      const BOT_MAX_DELTA = 0.07;
-      p.angle += Math.max(-BOT_MAX_DELTA, Math.min(BOT_MAX_DELTA, botDelta));
+        p.smoothedSteer = p.steer;
+        const BOT_MAX_DELTA = onGrassRestricted ? 0.015 : 0.07;
+        const botDelta = p.smoothedSteer * TURN_SPEED;
+        p.angle += Math.max(-BOT_MAX_DELTA, Math.min(BOT_MAX_DELTA, botDelta));
     }
 
     // ── Drafting Physics ──────────────────────────────────────────────────────
@@ -1069,38 +1067,28 @@ function updatePhysics() {
       currentFriction = 0.90;
     }
 
-    // ── Vector Decomposition Physics ──────────────────────────────────────────
-    // Resolve vx/vy into the car's local coordinate frame (forward / lateral)
+    // ── 3. LATERAL GRIP (The "Snap Straight") ─────────────────────────────────
     const cosA = Math.cos(p.angle);
     const sinA = Math.sin(p.angle);
 
-    // Dot-product projections onto heading axis and perpendicular (lateral) axis
-    const forwardVel  =  p.vx * cosA + p.vy * sinA;   // +ve = moving forward
-    const lateralVel  = -p.vx * sinA + p.vy * cosA;   // +ve = sliding right
+    const forwardVel  =  p.vx * cosA + p.vy * sinA;
+    const lateralVel  = -p.vx * sinA + p.vy * cosA;
 
-    // Lateral grip: keeps kart on its heading without killing speed.
-    const LATERAL_GRIP_BASE = 0.92; // Tighter base grip
-    const LATERAL_GRIP_DRIFT = 0.95; // Less slide at high speeds
-    const driftFactor = Math.min(currentSpeed / 4, 1);
-    let lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
+    const steerMagnitude = Math.abs(p.smoothedSteer || 0);
 
-    // ── THE "SNAP OUT" ASSIST ──
-    // If the player isn't steering hard (wheel is mostly straight)
-    // immediately give them massive grip to kill the slide.
-    // Disabled on grass: wall bounce misaligns velocity from heading and
-    // snap-out fires against that delta, causing violent wall-spins.
-    if (Math.abs(p.steer) < 0.2 && !onGrass) {
-        lateralFriction = 0.85; // Heavy friction to snap the car straight
-    }
+    // If the player holds the phone flat (steerMagnitude is 0), friction is 0.90 (heavy grip).
+    // This instantly kills the slide and snaps the car perfectly straight.
+    let lateralFriction = 0.90 + (0.07 * steerMagnitude); 
+    
+    // Disable Snap Straight on grass to prevent violent wall-bounces
+    if (onGrass) lateralFriction = 0.95;
 
-    // Apply separate friction to each axis (longitudinal rolls freely, lateral grips)
     const newForward = forwardVel * currentFriction;
     const newLateral = lateralVel * lateralFriction;
 
-    // Recompose back into world-space vx/vy
     p.vx = cosA * newForward - sinA * newLateral;
     p.vy = sinA * newForward + cosA * newLateral;
-    // ── End Vector Decomposition ───────────────────────────────────────────────
+    // ── End Lateral Grip ───────────────────────────────────────────────────────
     
     p.x += p.vx;
     p.y += p.vy;

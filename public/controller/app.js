@@ -152,7 +152,7 @@ socket.on('telemetry', (speed) => {
   }
 });
 
-// INPUT CAPTURE (Touch to Steer)
+// INPUT CAPTURE (Gyro to Steer, Touch to Brake)
 
 let touchesLeft = 0;
 let touchesRight = 0;
@@ -160,37 +160,55 @@ let touchesRight = 0;
 const leftZone = document.getElementById('left-zone');
 const rightZone = document.getElementById('right-zone');
 
+let baseGamma = 0;
+let isCalibrated = false;
+let currentGamma = 0;
+
+// Call this when the player presses "Start" or taps the screen for the first time
+function calibrateGyro(gammaVal) {
+    if (isCalibrated) return;
+    baseGamma = gammaVal;
+    isCalibrated = true;
+}
+
+window.addEventListener('deviceorientation', (e) => {
+    currentGamma = e.gamma || 0;
+    if (!isCalibrated) return; // Don't send data until they start the game
+
+    // Subtract their resting position from the current position
+    let rawSteer = currentGamma - baseGamma;
+
+    // Send the raw degree difference to the TV by updating padSteer directly
+    padSteer = rawSteer;
+
+    // Animate Steering Wheel visually (limit rotation visually)
+    const wheel = document.getElementById('steering-wheel');
+    if (wheel) {
+        let visualRot = Math.max(-90, Math.min(90, rawSteer * 1.5));
+        wheel.style.transform = `rotate(${visualRot}deg)`;
+    }
+});
+
 function updateController() {
   if (!isConnected) return;
 
   if (touchesLeft > 0 && touchesRight > 0) {
     // Both sides touched = Brake
-    padSteer = 0;
     padGas = -1;
-  } else if (touchesLeft > 0) {
-    // Steer Left
-    padSteer = -1;
-    padGas = 1; // Auto-gas
-  } else if (touchesRight > 0) {
-    // Steer Right
-    padSteer = 1;
-    padGas = 1; // Auto-gas
   } else {
-    // Neither touched = Straight ahead, auto-gas
-    padSteer = 0;
+    // Any single touch or no touch = Auto-gas
+    // We let the deviceorientation handle the steering
     padGas = 1;
-  }
-
-  // Animate Steering Wheel
-  const wheel = document.getElementById('steering-wheel');
-  if (wheel) {
-    wheel.style.transform = `rotate(${padSteer * 90}deg)`;
   }
 }
 
 function handleTouchStart(e, isLeft) {
   if (!isConnected) return;
   e.preventDefault();
+  
+  // Calibrate on first touch if not already calibrated
+  if (!isCalibrated) calibrateGyro(currentGamma); // use latest known gamma
+  
   if (isLeft) touchesLeft++;
   else touchesRight++;
   updateController();
@@ -215,16 +233,16 @@ rightZone.addEventListener('touchcancel', (e) => handleTouchEnd(e, false), { pas
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
   if (!isConnected) return;
-  if (e.key === 'ArrowLeft' || e.key === 'a') touchesLeft = 1;
-  if (e.key === 'ArrowRight' || e.key === 'd') touchesRight = 1;
+  if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = -40; // Max Lock
+  if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 40;
   if (e.key === 'ArrowDown' || e.key === 's') { touchesLeft = 1; touchesRight = 1; }
   updateController();
 });
 
 document.addEventListener('keyup', (e) => {
   if (!isConnected) return;
-  if (e.key === 'ArrowLeft' || e.key === 'a') touchesLeft = 0;
-  if (e.key === 'ArrowRight' || e.key === 'd') touchesRight = 0;
+  if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = 0;
+  if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 0;
   if (e.key === 'ArrowDown' || e.key === 's') { touchesLeft = 0; touchesRight = 0; }
   updateController();
 });
