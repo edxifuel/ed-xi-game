@@ -856,34 +856,31 @@ function updatePhysics() {
 
   Object.values(players).forEach(p => {
     
-    // Human Lap Tracker
-    if (!p.isBot) {
-      const wp = waypoints[p.targetWaypoint];
-      const distToWp = Math.hypot(wp.x - p.x, wp.y - p.y);
-      if (distToWp < 100) {
-        const nextWp = (p.targetWaypoint + 1) % waypoints.length;
-        // If crossing waypoint 0 AND they have driven most of the track, log a lap!
-        if (nextWp === 0 && p.targetWaypoint > waypoints.length * 0.7) {
-          const lapTime = Date.now() - p.lastLapMark;
-          if (lapTime < p.fastestLap) p.fastestLap = lapTime;
-          p.lapsCompleted++;
-          p.lastLapMark = Date.now();
-        }
-        p.targetWaypoint = nextWp;
+    // Universal Lap Tracker (Humans and Bots)
+    let wp = waypoints[p.targetWaypoint];
+    let dx = wp.x - p.x;
+    let dy = wp.y - p.y;
+    let dist = Math.hypot(dx, dy);
+    
+    if (dist < 120) {
+      const nextWp = (p.targetWaypoint + 1) % waypoints.length;
+      // If crossing waypoint 0 AND they have driven most of the track, log a lap!
+      if (nextWp === 0 && p.targetWaypoint > waypoints.length * 0.7) {
+        const lapTime = Date.now() - p.lastLapMark;
+        if (lapTime < p.fastestLap) p.fastestLap = lapTime;
+        p.lapsCompleted++;
+        p.lastLapMark = Date.now();
       }
+      p.targetWaypoint = nextWp;
+      // Re-fetch distance stats for AI steering towards new waypoint
+      wp = waypoints[p.targetWaypoint];
+      dx = wp.x - p.x;
+      dy = wp.y - p.y;
+      dist = Math.hypot(dx, dy);
     }
 
     // AI Processor
     if (p.isBot) {
-      const wp = waypoints[p.targetWaypoint];
-      const dx = wp.x - p.x;
-      const dy = wp.y - p.y;
-      const dist = Math.hypot(dx, dy);
-      
-      if (dist < 120) {
-        p.targetWaypoint = (p.targetWaypoint + 1) % waypoints.length;
-      }
-      
       let targetAngle = Math.atan2(dy, dx);
       let diff = targetAngle - p.angle;
       while (diff <= -Math.PI) diff += Math.PI * 2;
@@ -1258,7 +1255,6 @@ function drawBroadcastHUD() {
 
   // --- Live Leaderboard ---
   const sorted = Object.entries(players)
-    .filter(([, p]) => !p.isBot)
     .sort(([, a], [, b]) => {
       if (a.fastestLap === Infinity && b.fastestLap === Infinity) return 0;
       if (a.fastestLap === Infinity) return 1;
@@ -1288,16 +1284,14 @@ function drawBroadcastHUD() {
 }
 
 function doGridTransition() {
-  // Sort human players fastest-to-slowest, append bots
-  const humans = Object.entries(players).filter(([, p]) => !p.isBot);
-  const bots = Object.entries(players).filter(([, p]) => p.isBot);
-  humans.sort(([, a], [, b]) => {
+  // Sort all players fastest-to-slowest for the grid
+  const sortedArr = Object.entries(players).sort(([, a], [, b]) => {
     if (a.fastestLap === Infinity && b.fastestLap === Infinity) return 0;
     if (a.fastestLap === Infinity) return 1;
     if (b.fastestLap === Infinity) return -1;
     return a.fastestLap - b.fastestLap;
   });
-  const sortedKeys = [...humans.map(([k]) => k), ...bots.map(([k]) => k)];
+  const sortedKeys = sortedArr.map(([k]) => k);
   // Freeze velocities
   Object.values(players).forEach(p => { p.vx = 0; p.vy = 0; p.gas = 0; p.steer = 0; });
   alignStartingGrid(sortedKeys);
