@@ -936,13 +936,11 @@ function updatePhysics() {
 
       // THE HARD LOCK: If the car is barely moving, completely ignore steering.
       if (currentSpeed > 0.2) {
+          // User requested: More turning at HIGH speed, less at SLOW speed
+          // At STOP (speed 0): 0.2 (very weak turning)
+          // At FULL SPEED (speed 1.6): ~1.48 (very strong turning)
+          const speedSensitivity = 0.2 + (currentSpeed * 0.8);
 
-          // Give significantly MORE turning authority at high speeds, LESS at low speeds
-          // At speed 0 (stop) this factor is ~0.4 (very sluggish touch turns)
-          // At speed 1.6 (full speed) this jumps to ~1.2 (very sharp racing turns)
-          const speedSensitivity = 0.4 + (currentSpeed * 0.5);
-
-          // Use the raw linear steer value instead of squaring it, because Touch ramps up linearly anyway
           const rawDelta = p.smoothedSteer * TURN_SPEED * speedSensitivity;
 
           // MAX_DELTA matches bots, reduced on grass
