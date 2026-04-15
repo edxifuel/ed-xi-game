@@ -1332,18 +1332,10 @@ function drawTrack() {
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.closePath();
 
-  // ── Layer 1: Grass Base with Depth Shadow ─────────────────────────────────
+  // ── Layer 1: Grass Base (Shadow Removed for Performance) ──────────────────
   ctx.strokeStyle = '#2d5a27';
   ctx.lineWidth = 140; // slightly wider as track boundary
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 6;
   ctx.stroke();
-
-  // Reset shadow for the track surface tightly
-  ctx.shadowBlur = 0;
-  ctx.shadowColor = 'transparent';
-  ctx.shadowOffsetY = 0;
 
   // ── Layer 2: White Kerb Base (Rumble Strips) ──────────────────────────────
   ctx.strokeStyle = '#eeeeee';
