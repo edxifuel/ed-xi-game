@@ -918,7 +918,7 @@ function updatePhysics() {
       if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
 
       // How fast the virtual driver can crank the steering wheel
-      const WHEEL_TURN_SPEED = 0.015; 
+      const WHEEL_TURN_SPEED = 0.02; 
 
       if (p.steer === -1) {
           // Steer Left Linearly
@@ -927,8 +927,8 @@ function updatePhysics() {
           // Steer Right Linearly
           p.smoothedSteer = Math.min(1.0, p.smoothedSteer + WHEEL_TURN_SPEED);
       } else {
-          // Return to center slower
-          p.smoothedSteer *= 0.85; 
+          // Return to center AGGRESSIVELY. If this is too slow, the car feels floaty/twitchy.
+          p.smoothedSteer *= 0.50; 
           if (Math.abs(p.smoothedSteer) < 0.05) p.smoothedSteer = 0; // Snap to absolute 0
       }
 
@@ -936,10 +936,8 @@ function updatePhysics() {
 
       // THE HARD LOCK: If the car is barely moving, completely ignore steering.
       if (currentSpeed > 0.2) {
-          // User requested: More turning at HIGH speed, less at SLOW speed
-          // At STOP (speed 0): 0.2 (very weak turning)
-          // At FULL SPEED (speed 1.6): ~1.48 (very strong turning)
-          const speedSensitivity = 0.2 + (currentSpeed * 0.8);
+          // Less extremes: 0.5x at stop, maxing at 1.0x at top speed (1.57)
+          const speedSensitivity = Math.min(0.5 + (currentSpeed * 0.35), 1.0);
 
           const rawDelta = p.smoothedSteer * TURN_SPEED * speedSensitivity;
 
