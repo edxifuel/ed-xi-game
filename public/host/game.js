@@ -1015,8 +1015,11 @@ function updatePhysics() {
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
       // Tier 1 = 18%, Tier 2 = 23%, Tier 3 = 28%, Tier 4 = 33%
-      // Speed-gated: no draft at low speed, ramps to full above speed 3.0
-      const draftSpeedFactor = Math.min(currentSpeed / 3.0, 1.0);
+      // Hard cutoff: zero draft below speed 1.5, ramps to full at speed 3.0
+      const DRAFT_MIN = 1.5;
+      const DRAFT_MAX = 3.0;
+      const draftSpeedFactor = currentSpeed < DRAFT_MIN ? 0
+        : Math.min((currentSpeed - DRAFT_MIN) / (DRAFT_MAX - DRAFT_MIN), 1.0);
       const boostAmount = 0.13 + (0.05 * p.draftTier);
       const cappedBoost = Math.min(boostAmount, 0.33);
       currentPower = ENGINE_POWER * (1 + cappedBoost * draftSpeedFactor);
