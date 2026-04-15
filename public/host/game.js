@@ -1029,7 +1029,9 @@ function updatePhysics() {
     // Grass hard wall = 68px. No kerb friction zone — kerbs are purely visual.
     const HARD_WALL = 68;
 
+    let onGrass = false;
     if (trackInfo.distance > HARD_WALL) {
+      onGrass = true;
       // Clamp position back to grass edge
       const dx = p.x - trackInfo.closestX;
       const dy = p.y - trackInfo.closestY;
@@ -1069,7 +1071,9 @@ function updatePhysics() {
     // ── THE "SNAP OUT" ASSIST ──
     // If the player isn't steering hard (wheel is mostly straight)
     // immediately give them massive grip to kill the slide.
-    if (Math.abs(p.steer) < 0.2) {
+    // Disabled on grass: wall bounce misaligns velocity from heading and
+    // snap-out fires against that delta, causing violent wall-spins.
+    if (Math.abs(p.steer) < 0.2 && !onGrass) {
         lateralFriction = 0.85; // Heavy friction to snap the car straight
     }
 
