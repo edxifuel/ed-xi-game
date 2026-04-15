@@ -33,10 +33,27 @@ if (savedName) {
 
 // Check for direct-join URL
 const urlParams = new URLSearchParams(window.location.search);
-const codeParam = urlParams.get('code');
+let codeParam = urlParams.get('code');
+
+// Fallback just in case Railway trims query parameters or it's misread
+if (!codeParam && window.location.search.includes('code=')) {
+    codeParam = window.location.search.split('code=')[1].substring(0,4);
+}
+
 if (codeParam) {
   currentRoomCode = codeParam.toUpperCase();
   roomCodeWrapper.style.display = 'none';
+  
+  // iOS Apple WebKit strictly blocks gyroscope access unless activated by a direct button tap.
+  // Android allows instant auto-connect.
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      joinBtn.innerText = `TAP TO JOIN ${currentRoomCode}`;
+  } else {
+      // Non-iOS devices: Auto Join!
+      joinBtn.style.display = 'none'; 
+      const autoName = savedName ? savedName : 'RACER';
+      socket.emit('controllerJoin', { code: currentRoomCode, name: autoName });
+  }
 }
 
 // JOIN LOGIC
