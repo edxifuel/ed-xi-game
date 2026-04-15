@@ -937,13 +937,13 @@ function updatePhysics() {
       // THE HARD LOCK: If the car is barely moving, completely ignore steering.
       if (currentSpeed > 0.2) {
 
-          // Ramp from 0 → full authority as speed reaches 2.0
-          const lowSpeedFactor = Math.min(currentSpeed / 2.0, 1.0);
+          // Give significantly MORE turning authority at high speeds, LESS at low speeds
+          // At speed 0 (stop) this factor is ~0.4 (very sluggish touch turns)
+          // At speed 1.6 (full speed) this jumps to ~1.2 (very sharp racing turns)
+          const speedSensitivity = 0.4 + (currentSpeed * 0.5);
 
-          // Square the input: heavy center, sharp edges
-          const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
-
-          const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor;
+          // Use the raw linear steer value instead of squaring it, because Touch ramps up linearly anyway
+          const rawDelta = p.smoothedSteer * TURN_SPEED * speedSensitivity;
 
           // MAX_DELTA matches bots, reduced on grass
           const MAX_DELTA = onGrassRestricted ? 0.015 : 0.070;

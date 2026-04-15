@@ -307,6 +307,6 @@ select:focus {
   width: 100%;
   max-width: 350px;
   mix-blend-mode: multiply; /* Make white background transparent */
-  transition: transform 0.05s linear; /* smooth out gyro jitter */
+  transition: transform 0.5s ease-out; /* Smooth visual turn for touch controls */
   transform-origin: center center;
 }
