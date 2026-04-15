@@ -1,0 +1,20 @@
+{
+  "name": "Retro Velocity Controller",
+  "short_name": "Velocity",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050510",
+  "theme_color": "#FF0055",
+  "icons": [
+    {
+      "src": "assets/f1_wheel.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/f1_wheel.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
