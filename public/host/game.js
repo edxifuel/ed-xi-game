@@ -912,19 +912,25 @@ function updatePhysics() {
     if (p.grassTimer > 0) p.grassTimer--; // count down every frame
 
     if (!p.isBot) {
-      // ── 1. SANITIZE THE PHONE DATA ──────────────────────────────────────────
-      // Squish the raw phone angle (-40 to 40 degrees) down to a safe -1.0 to 1.0
-      let safeSteer = p.steer / 40.0;
-      safeSteer = Math.max(-1.0, Math.min(1.0, safeSteer));
+      // ── TOUCH PRE-PROCESSING (Virtual Steering Column) ───────────────────────
 
-      // Deadzone: Ignore shaky hands
-      if (Math.abs(safeSteer) < 0.15) {
-          safeSteer = 0;
-      }
-
-      // Low-Pass Filter: Smooth out the steering (always runs so there's no lag on takeoff)
+      // p.steer comes from the phone as exactly -1, 0, or 1.
       if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
-      p.smoothedSteer = (p.smoothedSteer * 0.80) + (safeSteer * 0.20);
+
+      // How fast the virtual driver can crank the steering wheel (0.05 is slow, 0.2 is fast)
+      const WHEEL_TURN_SPEED = 0.15; 
+
+      if (p.steer === -1) {
+          // Steer Left
+          p.smoothedSteer = Math.max(-1.0, p.smoothedSteer - WHEEL_TURN_SPEED);
+      } else if (p.steer === 1) {
+          // Steer Right
+          p.smoothedSteer = Math.min(1.0, p.smoothedSteer + WHEEL_TURN_SPEED);
+      } else {
+          // Let go of the screen: Spring-load back to center instantly
+          p.smoothedSteer *= 0.70; 
+          if (Math.abs(p.smoothedSteer) < 0.05) p.smoothedSteer = 0; // Snap to absolute 0
+      }
 
       // ── 2. APPLY TO YOUR PHYSICS ──────────────────────────────────────────
 

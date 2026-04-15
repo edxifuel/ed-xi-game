@@ -23,7 +23,7 @@ let isConnected = false;
 
 // Controller State
 let padSteer = 0;
-let padGas = 0;
+let padGas = 1; // Auto-gas by default
 
 // Load Driver Name from LocalStorage
 const savedName = localStorage.getItem('edxi_driver_name');
