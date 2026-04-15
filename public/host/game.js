@@ -1133,13 +1133,10 @@ function drawCars() {
     ctx.closePath();
     ctx.stroke();
 
-    // Nose cone — sharp pointed front
+    // Wide kart front bumper
     ctx.fillStyle = p.color;
     ctx.beginPath();
-    ctx.moveTo(16, -5);
-    ctx.lineTo(26,  0);
-    ctx.lineTo(16,  5);
-    ctx.closePath();
+    ctx.roundRect(14, -12, 5, 24, 2);
     ctx.fill();
 
     // Rear wing bar
