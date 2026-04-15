@@ -1046,9 +1046,10 @@ function updatePhysics() {
 
     // Catch-up Rubber-banding
     if (totalRacers > 1 && p.raceRank > 1) {
-        // Boost starts at 0% for 1st place and scales to 15% for Last Place
+        // Boost starts at 0% for 1st place and scales to 35% for Last Place.
+        // This ensures a lone car can ALWAYS overcome a pack of leaders drafting each other (+28% boost)
         const rankRatio = (p.raceRank - 1) / (totalRacers - 1);
-        const maxCatchUpBoost = 0.15; // 15% extra engine power
+        const maxCatchUpBoost = 0.35; // 35% extra engine power
         currentPower *= (1 + (rankRatio * maxCatchUpBoost));
     }
 
