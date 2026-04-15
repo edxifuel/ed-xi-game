@@ -195,7 +195,7 @@ function updatePlayerList() {
 
 // PHYSICS & RENDER LOOP
 // Increased speeds by an additional 15% for baseline feel.
-const ENGINE_POWER = 0.0276;
+const ENGINE_POWER = 0.0235;
 const FRICTION = 0.985;
 const TURN_SPEED = 0.080;
 
