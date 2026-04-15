@@ -854,7 +854,7 @@ function updatePhysics() {
   const avgSpeed = humanCount > 0 ? Math.max(totalHumanSpeed / humanCount, 1.0) : 1.5; 
   const waypoints = getWaypoints();
 
-  Object.values(players).forEach(p => {
+  Object.entries(players).forEach(([pid, p]) => {
     
     // Universal Lap Tracker (Humans and Bots)
     let wp = waypoints[p.targetWaypoint];
@@ -949,8 +949,10 @@ function updatePhysics() {
       }
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
-      // AI uses direct steer from waypoint targeting
-      p.angle += p.steer * TURN_SPEED;
+      // AI: turn toward waypoint, but cap per-frame delta to prevent spin-outs
+      const botDelta = p.steer * TURN_SPEED;
+      const BOT_MAX_DELTA = 0.07;
+      p.angle += Math.max(-BOT_MAX_DELTA, Math.min(BOT_MAX_DELTA, botDelta));
     }
 
     // ── Drafting Physics ──────────────────────────────────────────────────────
@@ -964,8 +966,8 @@ function updatePhysics() {
     let directLeader = null; // The one kart immediately ahead of us
     let bestDist = Infinity;
 
-    Object.values(players).forEach(other => {
-      if (other.id === p.id) return;
+    Object.entries(players).forEach(([otherId, other]) => {
+      if (otherId === pid) return;
       if (Math.hypot(other.vx, other.vy) < 0.8) return; // leader must be moving
 
       const dx = other.x - p.x;
