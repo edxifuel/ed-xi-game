@@ -903,6 +903,10 @@ function updatePhysics() {
     // Speed is needed by both steering and lateral grip — compute once here
     const currentSpeed = Math.hypot(p.vx, p.vy);
 
+    // Pre-check grass status so steering can be restrained on grass
+    const preTrackInfo = getTrackInfo(p.x, p.y, waypoints);
+    const onGrassNow = preTrackInfo.distance > 68;
+
     if (!p.isBot) {
       // ── 1. SANITIZE THE PHONE DATA ──────────────────────────────────────────
       // Squish the raw phone angle (-40 to 40 degrees) down to a safe -1.0 to 1.0
@@ -937,7 +941,9 @@ function updatePhysics() {
           const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
 
           // MAX_DELTA caps max angle change per frame
-          const MAX_DELTA = 0.048;
+          // Halved on grass: velocity is misaligned from heading at the wall,
+          // so full steering authority creates violent spins.
+          const MAX_DELTA = onGrassNow ? 0.024 : 0.048;
 
           p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       }
@@ -951,9 +957,9 @@ function updatePhysics() {
     // Two-pass detection so tier cascades work regardless of player process order:
     // Pass 1: find which kart (if any) is directly in front of us — fresh each frame.
     // Pass 2 (outside forEach) propagates the chain up to 4 tiers deep.
-    const DRAFT_RANGE = 250;          // pixels — ~2.5 kart lengths
-    const DRAFT_ANGLE_TOL = 0.45;     // ~26 degrees — cone behind the lead kart
-    const DRAFT_HEADING_TOL = 0.65;   // ~37 degrees — both karts going same way
+    const DRAFT_RANGE = 400;          // pixels — ~4 kart lengths
+    const DRAFT_ANGLE_TOL = 0.50;     // ~28 degrees — cone behind the lead kart
+    const DRAFT_HEADING_TOL = 0.70;   // ~40 degrees — both karts going same way
 
     let directLeader = null; // The one kart immediately ahead of us
     let bestDist = Infinity;
@@ -1258,6 +1264,16 @@ function drawCars() {
     ctx.shadowBlur = 5;
     ctx.shadowColor = p.color;
     ctx.fillText(p.name, p.x, p.y - 28);
+
+    // Draft boost indicator — cyan label shows tier + boost % when active
+    if (p.isDrafting && p.draftTier > 0) {
+      const boostPct = Math.round((0.30 + 0.10 * Math.min(p.draftTier, 4)) * 100);
+      ctx.fillStyle = '#00ffff';
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 8;
+      ctx.font = '8px "Press Start 2P", Courier, monospace';
+      ctx.fillText(`DRAFT +${boostPct}%`, p.x, p.y - 40);
+    }
     ctx.shadowBlur = 0;
   });
 }
