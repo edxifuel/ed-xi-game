@@ -153,131 +153,81 @@ socket.on('telemetry', (speed) => {
   }
 });
 
-// INPUT CAPTURE
+// INPUT CAPTURE (Touch to Steer)
 
-// Gas Pedal
-gasPedal.addEventListener('touchstart', (e) => {
-  if (!isConnected) return;
-  e.preventDefault();
-  padGas = 1;
-  gasPedal.classList.add('active');
-}, { passive: false });
+let touchesLeft = 0;
+let touchesRight = 0;
 
-gasPedal.addEventListener('touchend', (e) => {
-  if (!isConnected) return;
-  e.preventDefault();
-  padGas = 0;
-  gasPedal.classList.remove('active');
-}, { passive: false });
+const leftZone = document.getElementById('left-zone');
+const rightZone = document.getElementById('right-zone');
 
-gasPedal.addEventListener('mousedown', (e) => {
-  if (!isConnected) return;
-  padGas = 1;
-  gasPedal.classList.add('active');
-});
-
-gasPedal.addEventListener('mouseup', (e) => {
-  padGas = 0;
-  gasPedal.classList.remove('active');
-});
-
-// Brake Pedal
-brakePedal.addEventListener('touchstart', (e) => {
-  if (!isConnected) return;
-  e.preventDefault();
-  padGas = -1;
-  brakePedal.classList.add('active');
-}, { passive: false });
-
-brakePedal.addEventListener('touchend', (e) => {
-  if (!isConnected) return;
-  e.preventDefault();
-  padGas = 0;
-  brakePedal.classList.remove('active');
-}, { passive: false });
-
-brakePedal.addEventListener('mousedown', (e) => {
-  if (!isConnected) return;
-  padGas = -1;
-  brakePedal.classList.add('active');
-});
-
-brakePedal.addEventListener('mouseup', (e) => {
-  padGas = 0;
-  brakePedal.classList.remove('active');
-});
-
-// Tilt for Steering
-let steerOffset = null;    // calibrated neutral beta angle
-let smoothedSteer = 0;     // low-pass filtered output
-
-function handleOrientation(event) {
+function updateController() {
   if (!isConnected) return;
 
-  // In landscape orientation, LEFT/RIGHT tilt = event.beta (not gamma).
-  // Beta ranges -180 to 180. When held upright in landscape, beta ≈ 90.
-  // landscape-secondary (USB port on right) flips the sign.
-  let rawBeta = event.beta ?? 90;
-
-  const orientType = (screen.orientation || {}).type || '';
-  if (orientType === 'landscape-secondary') {
-    rawBeta = -rawBeta;
+  if (touchesLeft > 0 && touchesRight > 0) {
+    // Both sides touched = Brake
+    padSteer = 0;
+    padGas = -1;
+  } else if (touchesLeft > 0) {
+    // Steer Left
+    padSteer = -1;
+    padGas = 1; // Auto-gas
+  } else if (touchesRight > 0) {
+    // Steer Right
+    padSteer = 1;
+    padGas = 1; // Auto-gas
+  } else {
+    // Neither touched = Straight ahead, auto-gas
+    padSteer = 0;
+    padGas = 1;
   }
 
-  // Calibrate neutral on first reading so whatever angle the player
-  // naturally holds the phone = straight ahead.
-  if (steerOffset === null) {
-    steerOffset = rawBeta;
-  }
-
-  let tilt = rawBeta - steerOffset;
-
-  // Fix wrap-around: if delta jumps > 180 degrees it crossed the ±180 boundary.
-  // Clamp it so the kart never sees a sudden 180 flip.
-  if (tilt > 90)  tilt = 90;
-  if (tilt < -90) tilt = -90;
-
-  // The Game Host now handles deadzones, normalizing, and smoothing!
-  // Send the raw tilt directly to the host.
-  padSteer = tilt;
-
-  // Animate Steering Wheel (tilt is around +/- 40 for full lock, adapt visually)
+  // Animate Steering Wheel
   const wheel = document.getElementById('steering-wheel');
   if (wheel) {
-    const visualSteer = Math.max(-1.0, Math.min(1.0, tilt / 40.0));
-    wheel.style.transform = `rotate(${visualSteer * 120}deg)`;
+    wheel.style.transform = `rotate(${padSteer * 120}deg)`;
   }
 }
 
-// NOTE: Steering calibrates once on the first orientation event after joining.
-// No touch-based recalibration — gas/brake taps should never affect steering zero-point.
+function handleTouchStart(e, isLeft) {
+  if (!isConnected) return;
+  e.preventDefault();
+  if (isLeft) touchesLeft++;
+  else touchesRight++;
+  updateController();
+}
+
+function handleTouchEnd(e, isLeft) {
+  if (!isConnected) return;
+  e.preventDefault();
+  if (isLeft) touchesLeft = Math.max(0, touchesLeft - 1);
+  else touchesRight = Math.max(0, touchesRight - 1);
+  updateController();
+}
+
+leftZone.addEventListener('touchstart', (e) => handleTouchStart(e, true), { passive: false });
+leftZone.addEventListener('touchend', (e) => handleTouchEnd(e, true), { passive: false });
+leftZone.addEventListener('touchcancel', (e) => handleTouchEnd(e, true), { passive: false });
+
+rightZone.addEventListener('touchstart', (e) => handleTouchStart(e, false), { passive: false });
+rightZone.addEventListener('touchend', (e) => handleTouchEnd(e, false), { passive: false });
+rightZone.addEventListener('touchcancel', (e) => handleTouchEnd(e, false), { passive: false });
 
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
   if (!isConnected) return;
-  if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = -40; // Max left in degrees
-  if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 40; // Max right in degrees
-  if (e.key === 'ArrowUp' || e.key === 'w') {
-    padGas = 1;
-    gasPedal.classList.add('active');
-  }
-  if (e.key === 'ArrowDown' || e.key === 's') {
-    padGas = -1;
-    brakePedal.classList.add('active');
-  }
+  if (e.key === 'ArrowLeft' || e.key === 'a') touchesLeft = 1;
+  if (e.key === 'ArrowRight' || e.key === 'd') touchesRight = 1;
+  if (e.key === 'ArrowDown' || e.key === 's') { touchesLeft = 1; touchesRight = 1; }
+  updateController();
 });
 
 document.addEventListener('keyup', (e) => {
   if (!isConnected) return;
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') padSteer = 0;
-  if (e.key === 'ArrowUp' || e.key === 'w') {
-    padGas = 0;
-    gasPedal.classList.remove('active');
-  }
-  if (e.key === 'ArrowDown' || e.key === 's') {
-    padGas = 0;
-    brakePedal.classList.remove('active');
-  }
+  if (e.key === 'ArrowLeft' || e.key === 'a') touchesLeft = 0;
+  if (e.key === 'ArrowRight' || e.key === 'd') touchesRight = 0;
+  if (e.key === 'ArrowDown' || e.key === 's') { touchesLeft = 0; touchesRight = 0; }
+  updateController();
 });
 
 function sendInput() {

@@ -270,45 +270,29 @@ select:focus {
   padding: 40px 20px 20px 20px;
 }
 
-.pedal {
-  width: 25%;
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: auto; /* touch targets */
-  transition: all 0.1s;
-  background: rgba(255,255,255,0.05);
-  border: 2px dashed rgba(255,255,255,0.2);
+.touch-zone {
+  position: absolute;
+  top: 0;
+  width: 50vw;
+  height: 100vh;
+  z-index: 50; /* over top of everything */
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.pedal-label {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.8rem;
-  opacity: 0.5;
-  pointer-events: none;
+#left-zone {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 255, 221, 0.05), transparent);
 }
 
-.brake-pedal.active {
-  border-color: #ff2222;
-  background: rgba(255, 34, 34, 0.3);
-  box-shadow: 0 0 30px rgba(255, 34, 34, 0.8);
+#right-zone {
+  right: 0;
+  background: linear-gradient(to left, rgba(255, 0, 85, 0.05), transparent);
 }
 
-.brake-pedal.active .pedal-label {
-  opacity: 1;
-  color: #ff2222;
-}
-
-.gas-pedal.active {
-  border-color: #ff7700;
-  background: rgba(255, 119, 0, 0.3);
-  box-shadow: 0 0 30px rgba(255, 119, 0, 0.8);
-}
-
-.gas-pedal.active .pedal-label {
-  opacity: 1;
-  color: #ff7700;
+/* Optional active hit state (could add via JS later if requested) */
+.touch-zone:active {
+  opacity: 0.8;
 }
 
 .steering-column {
