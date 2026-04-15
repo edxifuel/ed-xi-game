@@ -1337,41 +1337,16 @@ function drawTrack() {
   ctx.lineWidth = 140; // slightly wider as track boundary
   ctx.stroke();
 
-  // ── Layer 2: White Kerb Base (Rumble Strips) ──────────────────────────────
-  ctx.strokeStyle = '#eeeeee';
-  ctx.lineWidth = 108; // 6px kerb on each side of the 96px asphalt
+  // ── Layer 2: Painted White Track Edges ────────────────────────────────────
+  // Drawn just slightly wider than the asphalt to create a crisp 2px solid border
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 100;
   ctx.stroke();
 
-  // ── Layer 3: Red Kerb Stripes (Dashed) ────────────────────────────────────
-  ctx.strokeStyle = '#cc0000';
-  ctx.lineWidth = 108;
-  ctx.setLineDash([24, 24]); // 24px red, 24px white gap
-  ctx.stroke();
-  ctx.setLineDash([]); // Reset dash for the rest
-
-  // ── Layer 4: Asphalt Base ─────────────────────────────────────────────────
-  ctx.strokeStyle = '#38383a';
+  // ── Layer 3: Asphalt Base ─────────────────────────────────────────────────
+  ctx.strokeStyle = '#3a3a3a';
   ctx.lineWidth = 96;
   ctx.stroke();
-
-  // ── Layer 5: Painted White Track Edges ────────────────────────────────────
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 90;
-  ctx.globalAlpha = 0.4; // Slightly faded road paint
-  ctx.stroke();
-
-  // ── Layer 6: Inner Asphalt (covers the middle of the painted lines) ───────
-  ctx.globalAlpha = 1.0;
-  ctx.strokeStyle = '#38383a';
-  ctx.lineWidth = 86; // Leaves a 2px painted white line visible on each edge
-  ctx.stroke();
-
-  // ── Layer 7: Racing Line / Skidmarks ──────────────────────────────────────
-  ctx.strokeStyle = '#111111';
-  ctx.lineWidth = 24;
-  ctx.globalAlpha = 0.15; // Subtle rubber build-up in the center
-  ctx.stroke();
-  ctx.globalAlpha = 1.0;
 
 
   // ── Layer 5: Checkered Start/Finish line ─────────────────────────────────
