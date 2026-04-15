@@ -947,26 +947,6 @@ function updatePhysics() {
           const MAX_DELTA = onGrassRestricted ? 0.015 : 0.070;
 
           p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
-
-          // ── TRACK FOLLOW ASSIST ─────────────────────────────────────────────
-          // Gently nudge the kart toward the ideal track direction.
-          // Fades to 0 when player is steering hard (they have full override).
-          // Fades to 0 at low speed and on grass.
-          if (!onGrassRestricted) {
-            const nextWpIdx = (p.targetWaypoint + 1) % waypoints.length;
-            const twx = waypoints[nextWpIdx].x - waypoints[p.targetWaypoint].x;
-            const twy = waypoints[nextWpIdx].y - waypoints[p.targetWaypoint].y;
-            const idealAngle = Math.atan2(twy, twx);
-
-            let assistDiff = idealAngle - p.angle;
-            while (assistDiff <= -Math.PI) assistDiff += Math.PI * 2;
-            while (assistDiff >  Math.PI) assistDiff -= Math.PI * 2;
-
-            // Assist is strongest when going straight, zero at full lock
-            const steerOverride = Math.abs(p.smoothedSteer);
-            const assistStrength = 0.15 * (1.0 - steerOverride) * lowSpeedFactor;
-            p.angle += assistDiff * assistStrength;
-          }
       }
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
