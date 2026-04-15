@@ -194,10 +194,10 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-// Increased speeds by 50% for faster gameplay, but keeping turn speed manageable
-const ENGINE_POWER = 0.024;
+// Increased speeds by an additional 15% for baseline feel.
+const ENGINE_POWER = 0.0276;
 const FRICTION = 0.985;
-const TURN_SPEED = 0.065; // Reduced from 0.081 to prevent twitchiness at new top speed
+const TURN_SPEED = 0.065;
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
