@@ -1158,9 +1158,11 @@ function updatePhysics() {
         b.x += nx * overlap;
         b.y += ny * overlap;
         // Exchange velocity along collision normal (bouncy bump)
+        // Heavily softened (was 0.55) to prevent massive lateral velocity transfer 
+        // that caused the car to violently fishtail/skid when in a pack.
         const relVelN = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
         if (relVelN > 0) {
-          const impulse = relVelN * 0.55;
+          const impulse = relVelN * 0.10; // Soft nudge instead of violent ricochet
           a.vx -= impulse * nx;
           a.vy -= impulse * ny;
           b.vx += impulse * nx;
