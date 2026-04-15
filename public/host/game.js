@@ -963,9 +963,9 @@ function updatePhysics() {
 
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
-      // Base boost of 30%, adding +10% for each kart in the train ahead of us!
-      const boostAmount = 0.30 + (0.10 * p.draftTier);
-      const cappedBoost = Math.min(boostAmount, 0.65); // Cap at 65% extra power
+      // Base boost of 20%, adding +5% for each kart in the train ahead of us!
+      const boostAmount = 0.20 + (0.05 * p.draftTier);
+      const cappedBoost = Math.min(boostAmount, 0.40); // Cap at 40% extra power
       currentPower = ENGINE_POWER * (1 + cappedBoost);
     }
 
