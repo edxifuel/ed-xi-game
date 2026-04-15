@@ -950,16 +950,16 @@ function updatePhysics() {
         if (currentSpeed > 0.2) { 
             const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0); 
             
-            // Reduced penalty at high speed: 0.25 instead of 0.45 so turning remains responsive
-            const highSpeedFactor = 1 / (1 + currentSpeed * 0.25);
+            // Midpoint dampening: 0.35 (was 0.45 too slow, 0.25 too twitchy)
+            const highSpeedFactor = 1 / (1 + currentSpeed * 0.35);
 
             // Square the input so the center is steady, but hard tilts turn sharp
             const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
 
             const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
             
-            // Allow slightly tighter snaps when holding max lock at high speed
-            const MAX_DELTA = onGrassRestricted ? 0.015 : 0.065; 
+            // Restore smooth max bounds
+            const MAX_DELTA = onGrassRestricted ? 0.015 : 0.055;  
             
             p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
         }
