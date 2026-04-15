@@ -181,37 +181,51 @@ socket.on('telemetry', (speed) => {
 
 // INPUT CAPTURE (Gyro to Steer, Touch to Brake)
 
-let baseTilt = 0;
+let baseTilt = null;
 let isCalibrated = false;
 let currentTilt = 0;
 
 // Call this when the player presses "Start" or taps the screen for the first time
 function calibrateGyro(tiltVal) {
-    if (isCalibrated) return;
     baseTilt = tiltVal;
     isCalibrated = true;
     const errorMsg = document.getElementById('error-msg');
     if (errorMsg) errorMsg.innerText = 'CALIBRATED';
 }
 
-window.addEventListener('deviceorientation', (e) => {
-    // In landscape mode, rotating the device left/right pitches the hardware (beta)
-    currentTilt = e.beta || 0;
-    
-    // Auto-calibrate on first significant read if not already done via tap
-    if (!isCalibrated && Math.abs(currentTilt) > 1) {
-        calibrateGyro(currentTilt);
-    }
-    
-    if (!isCalibrated) return; // Don't send data until they start the game
+// Re-calibrate whenever they hold both pedals to reset their center
+function handleReCenter() {
+    baseTilt = currentTilt;
+}
 
-    // Subtract their resting position from the current position
+window.addEventListener('deviceorientation', (e) => {
+    let rawBeta = e.beta || 90;
+
+    // Compensate for phone being flipped the other way in landscape
+    const orientType = (screen.orientation || {}).type || '';
+    if (orientType === 'landscape-secondary') {
+        rawBeta = -rawBeta;
+    }
+
+    currentTilt = rawBeta;
+    
+    if (!isCalibrated) return; // Wait until they explicitly tap a pedal
+
+    // Subtract resting position
     let rawSteer = currentTilt - baseTilt;
 
-    // Send the raw degree difference to the TV by updating padSteer directly
+    // Fix wrap-around if device crosses the 180/-180 boundary
+    if (rawSteer > 180) rawSteer -= 360;
+    if (rawSteer < -180) rawSteer += 360;
+
+    // Hard clamp to prevent flips
+    if (rawSteer > 90) rawSteer = 90;
+    if (rawSteer < -90) rawSteer = -90;
+
+    // Send the raw degree difference to the TV
     padSteer = rawSteer;
 
-    // Animate Steering Wheel visually (limit rotation visually)
+    // Animate Steering Wheel visually
     const wheel = document.getElementById('steering-wheel');
     if (wheel) {
         let visualRot = Math.max(-90, Math.min(90, rawSteer * 1.5));
@@ -231,6 +245,10 @@ function updateController() {
     padGas = 1;
   } else {
     padGas = 0; // Coast
+  }
+
+  if (isBrakePressed && isGasPressed) {
+    handleReCenter(); // Recenter steering if holding both pedals
   }
 }
 
