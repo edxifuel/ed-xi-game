@@ -234,9 +234,6 @@ function updateController() {
   }
 }
 
-const gasPedal = document.getElementById('gas-pedal');
-const brakePedal = document.getElementById('brake-pedal');
-
 function handleGasStart(e) { 
   if (!isConnected) return;
   e.preventDefault(); 
