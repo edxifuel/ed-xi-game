@@ -130,8 +130,8 @@ socket.on('raceStart', (settings) => {
     updatePlayerList();
   }
   
-  // Start the 4 minute qualifying timer
-  sessionEndsAt = Date.now() + (4 * 60 * 1000); 
+  // Start the 2 minute qualifying timer
+  sessionEndsAt = Date.now() + (2 * 60 * 1000); 
   
   // Wipe session stats
   Object.values(players).forEach(p => {
@@ -1430,7 +1430,7 @@ function loop() {
       // After 5 seconds, begin the race
       setTimeout(() => {
         gameState = 'racing';
-        sessionEndsAt = Date.now() + (8 * 60 * 1000);
+        sessionEndsAt = Date.now() + (4 * 60 * 1000);
       }, 5000);
     }
 
