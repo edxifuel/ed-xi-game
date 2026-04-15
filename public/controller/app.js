@@ -69,6 +69,12 @@ joinBtn.addEventListener('click', async () => {
   const driverName = driverNameInput.value.trim().toUpperCase() || 'RACER';
   localStorage.setItem('edxi_driver_name', driverName);
 
+  // Force virtual keyboards to close so they don't break touch hitboxes 
+  // and scroll layout when the user clicks 'Start Engine'
+  driverNameInput.blur();
+  roomCodeInput.blur();
+  window.scrollTo(0, 0);
+
   // Request Device Orientation Permissions (iOS 13+ requirement)
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     try {
@@ -88,9 +94,15 @@ joinBtn.addEventListener('click', async () => {
   currentRoomCode = code;
 });
 
+let inputInterval = null;
+
 socket.on('joinSuccess', (data) => {
   isConnected = true;
   myColor = data.color;
+  
+  // Constantly stream input the second we are successfully connected 
+  // so late-joiners don't get trapped with a dead controller
+  if (!inputInterval) inputInterval = setInterval(sendInput, 1000 / 20);
   
   // Transition UI
   joinScreen.classList.remove('active');
@@ -143,8 +155,6 @@ socket.on('raceStart', (settings) => {
   vipScreen.classList.remove('active');
   waitScreen.classList.remove('active');
   gamepadScreen.classList.add('active');
-  
-  setInterval(sendInput, 1000 / 20); 
 });
 
 socket.on('joinError', (msg) => {
