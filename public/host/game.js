@@ -922,9 +922,51 @@ function updatePhysics() {
       p.angle += p.steer * TURN_SPEED;
     }
 
+    // ── Drafting Physics ──────────────────────────────────────────────────────
+    let isDrafting = false;
+    const DRAFT_RANGE = 200; // About 2 kart lengths
+    const DRAFT_ANGLE_TOLERANCE = 0.4; // roughly 22 degrees
+
+    Object.values(players).forEach(other => {
+      if (other.id === p.id) return;
+      
+      // Basic distance check
+      const dx = other.x - p.x;
+      const dy = other.y - p.y;
+      const distSq = dx*dx + dy*dy;
+      
+      if (distSq < DRAFT_RANGE * DRAFT_RANGE && distSq > 400) {
+        // Calculate angle TO the other kart
+        const angleToOther = Math.atan2(dy, dx);
+        
+        // Are we pointing roughly at the other kart?
+        let angleDiff = angleToOther - p.angle;
+        while (angleDiff <= -Math.PI) angleDiff += Math.PI * 2;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        
+        // Is the other kart also pointing roughly the same way?
+        let headingDiff = other.angle - p.angle;
+        while (headingDiff <= -Math.PI) headingDiff += Math.PI * 2;
+        while (headingDiff > Math.PI) headingDiff -= Math.PI * 2;
+
+        if (Math.abs(angleDiff) < DRAFT_ANGLE_TOLERANCE && Math.abs(headingDiff) < Math.PI / 4) {
+           // Let's also check if they are going fast enough to create a draft
+           if (Math.hypot(other.vx, other.vy) > 1.0) {
+             isDrafting = true;
+           }
+        }
+      }
+    });
+    p.isDrafting = isDrafting;
+
+    let currentPower = ENGINE_POWER;
+    if (p.isDrafting) {
+      currentPower = ENGINE_POWER * 1.35; // 35% speed boost when drafting!
+    }
+
     if (p.gas === 1) {
-      p.vx += Math.cos(p.angle) * ENGINE_POWER;
-      p.vy += Math.sin(p.angle) * ENGINE_POWER;
+      p.vx += Math.cos(p.angle) * currentPower;
+      p.vy += Math.sin(p.angle) * currentPower;
     } else if (p.gas === -1) {
       // Braking / Reverse (Strong fixed deceleration)
       p.vx -= Math.cos(p.angle) * 0.06;
@@ -1121,10 +1163,26 @@ function drawCars() {
       ctx.shadowColor = p.color;
     }
 
+    // ── Drafting Visuals ──────────────────────────────────────────────────────
+    if (p.isDrafting && p.gas === 1) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let sl=0; sl<3; sl++) {
+        const lx = 14 + Math.random() * 8;
+        const ly = -8 + sl * 8 + (Math.random() - 0.5) * 4;
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(lx - 20 - Math.random() * 15, ly);
+      }
+      ctx.stroke();
+    }
+
     // ── Exhaust Thrust ────────────────────────────────────────────────────────
     if (p.gas === 1) {
-      ctx.strokeStyle = '#ff7700';
-      ctx.shadowColor = '#ff7700';
+      ctx.strokeStyle = p.isDrafting ? '#00ffff' : '#ff7700';
+      ctx.shadowColor = p.isDrafting ? '#00ffff' : '#ff7700';
       ctx.shadowBlur = 15;
       ctx.lineWidth = 3;
       ctx.lineCap = 'round';
