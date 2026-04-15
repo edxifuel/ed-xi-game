@@ -917,18 +917,18 @@ function updatePhysics() {
       // p.steer comes from the phone as exactly -1, 0, or 1.
       if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
 
-      // How fast the virtual driver can crank the steering wheel (0.05 is slow, 0.2 is fast)
-      const WHEEL_TURN_SPEED = 0.15; 
+      // How fast the virtual driver can crank the steering wheel
+      const WHEEL_TURN_SPEED = 0.04; 
 
       if (p.steer === -1) {
-          // Steer Left
+          // Steer Left Linearly
           p.smoothedSteer = Math.max(-1.0, p.smoothedSteer - WHEEL_TURN_SPEED);
       } else if (p.steer === 1) {
-          // Steer Right
+          // Steer Right Linearly
           p.smoothedSteer = Math.min(1.0, p.smoothedSteer + WHEEL_TURN_SPEED);
       } else {
-          // Let go of the screen: Spring-load back to center instantly
-          p.smoothedSteer *= 0.70; 
+          // Return to center slower
+          p.smoothedSteer *= 0.85; 
           if (Math.abs(p.smoothedSteer) < 0.05) p.smoothedSteer = 0; // Snap to absolute 0
       }
 
