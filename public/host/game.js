@@ -963,9 +963,9 @@ function updatePhysics() {
     // Two-pass detection so tier cascades work regardless of player process order:
     // Pass 1: find which kart (if any) is directly in front of us — fresh each frame.
     // Pass 2 (outside forEach) propagates the chain up to 4 tiers deep.
-    const DRAFT_RANGE = 400;          // pixels — ~4 kart lengths
-    const DRAFT_ANGLE_TOL = 0.50;     // ~28 degrees — cone behind the lead kart
-    const DRAFT_HEADING_TOL = 0.70;   // ~40 degrees — both karts going same way
+    const DRAFT_RANGE = 200;          // pixels — ~2 kart lengths
+    const DRAFT_ANGLE_TOL = 0.50;     // ~28 degrees
+    const DRAFT_HEADING_TOL = 0.70;   // ~40 degrees
 
     let directLeader = null; // The one kart immediately ahead of us
     let bestDist = Infinity;
@@ -1017,9 +1017,9 @@ function updatePhysics() {
 
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
-      // Tier 1 = 35%, Tier 2 = 45%, Tier 3 = 55%, Tier 4 = 65%
-      const boostAmount = 0.30 + (0.10 * p.draftTier);
-      const cappedBoost = Math.min(boostAmount, 0.65);
+      // Tier 1 = 18%, Tier 2 = 23%, Tier 3 = 28%, Tier 4 = 33%
+      const boostAmount = 0.13 + (0.05 * p.draftTier);
+      const cappedBoost = Math.min(boostAmount, 0.33);
       currentPower = ENGINE_POWER * (1 + cappedBoost);
     }
 
