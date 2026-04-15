@@ -194,10 +194,10 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-// Increased speeds by 50% for faster gameplay
+// Increased speeds by 50% for faster gameplay, but keeping turn speed manageable
 const ENGINE_POWER = 0.024;
 const FRICTION = 0.985;
-const TURN_SPEED = 0.081;
+const TURN_SPEED = 0.065; // Reduced from 0.081 to prevent twitchiness at new top speed
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
@@ -910,11 +910,11 @@ function updatePhysics() {
       const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
 
       // HIGH-SPEED REDUCTION: prevents spin-outs at top speed
-      const highSpeedFactor = 1 / (1 + currentSpeed * 0.25);
+      const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
 
-      // Clamp max heading change per frame (~0.045 rad = ~2.5°/frame = ~45°/sec at 60fps)
+      // Clamp max heading change per frame
       const rawDelta = p.steer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
-      const MAX_DELTA = 0.045;
+      const MAX_DELTA = 0.038;
       p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
