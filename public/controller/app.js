@@ -184,7 +184,7 @@ function updateController() {
   // Animate Steering Wheel
   const wheel = document.getElementById('steering-wheel');
   if (wheel) {
-    wheel.style.transform = `rotate(${padSteer * 120}deg)`;
+    wheel.style.transform = `rotate(${padSteer * 90}deg)`;
   }
 }
 
