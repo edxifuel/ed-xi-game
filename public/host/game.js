@@ -923,8 +923,9 @@ function updatePhysics() {
       // This instantly cures low-speed parking-lot twitch.
       if (currentSpeed > 0.2) {
 
-          // Stretch the ramp so it takes longer to hit max turning power
-          const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0);
+          // Ramp from 0 → full authority as speed goes 0 → 5.0
+          // Wider denominator = gentler, less twitchy at low speed
+          const lowSpeedFactor = Math.min(currentSpeed / 5.0, 1.0);
 
           // Keeps high-speed stability
           const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
@@ -935,9 +936,8 @@ function updatePhysics() {
           // TURN_SPEED determines how FAST the wheel turns
           const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
 
-          // MAX_DELTA determines the absolute maximum angle change per frame.
-          // INCREASE THIS if you increased TURN_SPEED, otherwise it will clip and feel jerky!
-          const MAX_DELTA = 0.055;
+          // MAX_DELTA caps max angle change per frame — lower = smoother
+          const MAX_DELTA = 0.042;
 
           p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       }
