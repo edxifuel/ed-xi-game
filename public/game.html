@@ -55,13 +55,17 @@
       100% { transform: rotateX(60deg) translateY(60px); }
     }
 
-    h1 {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 3rem;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink);
+    .boot-logo {
+      max-width: 80%;
+      width: 400px;
       margin-bottom: 3rem;
-      text-align: center;
+      filter: drop-shadow(0 0 10px var(--neon-pink));
+      animation: pulseLogo 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseLogo {
+      from { filter: drop-shadow(0 0 10px var(--neon-pink)); transform: scale(1); }
+      to { filter: drop-shadow(0 0 25px var(--neon-pink)); transform: scale(1.02); }
     }
 
     .btn-container {
@@ -112,7 +116,7 @@
 </head>
 <body>
   <div class="grid-overlay"></div>
-  <h1>Retro Velocity</h1>
+  <img src="/1000005986.png" alt="Retro Velocity" class="boot-logo">
   <div class="btn-container">
     <a href="/host/index.html" class="btn btn-blue" tabindex="1">HOST GAME (TV)</a>
     <a href="/controller/index.html" class="btn btn-pink" tabindex="2">JOIN GAME (MOBILE)</a>
