@@ -23,7 +23,7 @@ let isConnected = false;
 
 // Controller State
 let padSteer = 0;
-let padGas = 1; // Auto-gas by default
+let padGas = 0; // 0 = Coast, 1 = Gas, -1 = Brake
 
 // Load Driver Name from LocalStorage
 const savedName = localStorage.getItem('edxi_driver_name');
@@ -154,29 +154,32 @@ socket.on('telemetry', (speed) => {
 
 // INPUT CAPTURE (Gyro to Steer, Touch to Brake)
 
-let touchesLeft = 0;
-let touchesRight = 0;
-
-const leftZone = document.getElementById('left-zone');
-const rightZone = document.getElementById('right-zone');
-
-let baseGamma = 0;
+let baseTilt = 0;
 let isCalibrated = false;
-let currentGamma = 0;
+let currentTilt = 0;
 
 // Call this when the player presses "Start" or taps the screen for the first time
-function calibrateGyro(gammaVal) {
+function calibrateGyro(tiltVal) {
     if (isCalibrated) return;
-    baseGamma = gammaVal;
+    baseTilt = tiltVal;
     isCalibrated = true;
+    const errorMsg = document.getElementById('error-msg');
+    if (errorMsg) errorMsg.innerText = 'CALIBRATED';
 }
 
 window.addEventListener('deviceorientation', (e) => {
-    currentGamma = e.gamma || 0;
+    // In landscape mode, rotating the device left/right pitches the hardware (beta)
+    currentTilt = e.beta || 0;
+    
+    // Auto-calibrate on first significant read if not already done via tap
+    if (!isCalibrated && Math.abs(currentTilt) > 1) {
+        calibrateGyro(currentTilt);
+    }
+    
     if (!isCalibrated) return; // Don't send data until they start the game
 
     // Subtract their resting position from the current position
-    let rawSteer = currentGamma - baseGamma;
+    let rawSteer = currentTilt - baseTilt;
 
     // Send the raw degree difference to the TV by updating padSteer directly
     padSteer = rawSteer;
@@ -189,53 +192,75 @@ window.addEventListener('deviceorientation', (e) => {
     }
 });
 
+let isGasPressed = false;
+let isBrakePressed = false;
+
 function updateController() {
   if (!isConnected) return;
 
-  if (touchesLeft > 0 && touchesRight > 0) {
-    // Both sides touched = Brake
+  if (isBrakePressed) {
     padGas = -1;
-  } else {
-    // Any single touch or no touch = Auto-gas
-    // We let the deviceorientation handle the steering
+  } else if (isGasPressed) {
     padGas = 1;
+  } else {
+    padGas = 0; // Coast
   }
 }
 
-function handleTouchStart(e, isLeft) {
+const gasPedal = document.getElementById('gas-pedal');
+const brakePedal = document.getElementById('brake-pedal');
+
+function handleGasStart(e) { 
   if (!isConnected) return;
-  e.preventDefault();
-  
-  // Calibrate on first touch if not already calibrated
-  if (!isCalibrated) calibrateGyro(currentGamma); // use latest known gamma
-  
-  if (isLeft) touchesLeft++;
-  else touchesRight++;
-  updateController();
+  e.preventDefault(); 
+  if (!isCalibrated) calibrateGyro(currentTilt); 
+  isGasPressed = true; 
+  if(gasPedal) gasPedal.classList.add('active');
+  updateController(); 
+}
+function handleGasEnd(e) { 
+  if(!isConnected) return; 
+  e.preventDefault(); 
+  isGasPressed = false; 
+  if(gasPedal) gasPedal.classList.remove('active');
+  updateController(); 
 }
 
-function handleTouchEnd(e, isLeft) {
+function handleBrakeStart(e) { 
   if (!isConnected) return;
-  e.preventDefault();
-  if (isLeft) touchesLeft = Math.max(0, touchesLeft - 1);
-  else touchesRight = Math.max(0, touchesRight - 1);
-  updateController();
+  e.preventDefault(); 
+  if (!isCalibrated) calibrateGyro(currentTilt); 
+  isBrakePressed = true; 
+  if(brakePedal) brakePedal.classList.add('active');
+  updateController(); 
+}
+function handleBrakeEnd(e) { 
+  if(!isConnected) return; 
+  e.preventDefault(); 
+  isBrakePressed = false; 
+  if(brakePedal) brakePedal.classList.remove('active');
+  updateController(); 
 }
 
-leftZone.addEventListener('touchstart', (e) => handleTouchStart(e, true), { passive: false });
-leftZone.addEventListener('touchend', (e) => handleTouchEnd(e, true), { passive: false });
-leftZone.addEventListener('touchcancel', (e) => handleTouchEnd(e, true), { passive: false });
+if (gasPedal) {
+  gasPedal.addEventListener('touchstart', handleGasStart, { passive: false });
+  gasPedal.addEventListener('touchend', handleGasEnd, { passive: false });
+  gasPedal.addEventListener('touchcancel', handleGasEnd, { passive: false });
+}
 
-rightZone.addEventListener('touchstart', (e) => handleTouchStart(e, false), { passive: false });
-rightZone.addEventListener('touchend', (e) => handleTouchEnd(e, false), { passive: false });
-rightZone.addEventListener('touchcancel', (e) => handleTouchEnd(e, false), { passive: false });
+if (brakePedal) {
+  brakePedal.addEventListener('touchstart', handleBrakeStart, { passive: false });
+  brakePedal.addEventListener('touchend', handleBrakeEnd, { passive: false });
+  brakePedal.addEventListener('touchcancel', handleBrakeEnd, { passive: false });
+}
 
 // Fallback keyboard support for quick desktop testing
 document.addEventListener('keydown', (e) => {
   if (!isConnected) return;
   if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = -40; // Max Lock
   if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 40;
-  if (e.key === 'ArrowDown' || e.key === 's') { touchesLeft = 1; touchesRight = 1; }
+  if (e.key === 'ArrowUp' || e.key === 'w') isGasPressed = true;
+  if (e.key === 'ArrowDown' || e.key === 's') isBrakePressed = true;
   updateController();
 });
 
@@ -243,7 +268,8 @@ document.addEventListener('keyup', (e) => {
   if (!isConnected) return;
   if (e.key === 'ArrowLeft' || e.key === 'a') padSteer = 0;
   if (e.key === 'ArrowRight' || e.key === 'd') padSteer = 0;
-  if (e.key === 'ArrowDown' || e.key === 's') { touchesLeft = 0; touchesRight = 0; }
+  if (e.key === 'ArrowUp' || e.key === 'w') isGasPressed = false;
+  if (e.key === 'ArrowDown' || e.key === 's') isBrakePressed = false;
   updateController();
 });
 
