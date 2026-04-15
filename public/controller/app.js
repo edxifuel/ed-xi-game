@@ -35,9 +35,12 @@ if (savedName) {
 const urlParams = new URLSearchParams(window.location.search);
 let codeParam = urlParams.get('code');
 
-// Fallback just in case Railway trims query parameters or it's misread
-if (!codeParam && window.location.search.includes('code=')) {
-    codeParam = window.location.search.split('code=')[1].substring(0,4);
+// Fallback just in case Railway trims query parameters or it is placed in the hash
+if (!codeParam) {
+    const urlMatches = window.location.href.match(/code=([A-Za-z0-9]{4})/i);
+    if (urlMatches) {
+        codeParam = urlMatches[1];
+    }
 }
 
 if (codeParam) {
@@ -52,7 +55,14 @@ if (codeParam) {
       // Non-iOS devices: Auto Join!
       joinBtn.style.display = 'none'; 
       const autoName = savedName ? savedName : 'RACER';
-      socket.emit('controllerJoin', { code: currentRoomCode, name: autoName });
+      
+      if (socket.connected) {
+          socket.emit('controllerJoin', { code: currentRoomCode, name: autoName });
+      } else {
+          socket.on('connect', () => {
+              socket.emit('controllerJoin', { code: currentRoomCode, name: autoName });
+          });
+      }
   }
 }
 
