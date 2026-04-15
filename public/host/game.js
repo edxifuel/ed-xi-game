@@ -1018,9 +1018,14 @@ function updatePhysics() {
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
       // Tier 1 = 18%, Tier 2 = 23%, Tier 3 = 28%, Tier 4 = 33%
+      // Speed-gated: no draft at low speed, ramps to full above speed 3.0
+      const draftSpeedFactor = Math.min(currentSpeed / 3.0, 1.0);
       const boostAmount = 0.13 + (0.05 * p.draftTier);
       const cappedBoost = Math.min(boostAmount, 0.33);
-      currentPower = ENGINE_POWER * (1 + cappedBoost);
+      currentPower = ENGINE_POWER * (1 + cappedBoost * draftSpeedFactor);
+      p.draftBoostPct = Math.round(cappedBoost * draftSpeedFactor * 100); // store for label
+    } else {
+      p.draftBoostPct = 0;
     }
 
     if (p.gas === 1) {
@@ -1272,14 +1277,13 @@ function drawCars() {
     ctx.shadowColor = p.color;
     ctx.fillText(p.name, p.x, p.y - 28);
 
-    // Draft boost indicator — cyan label shows tier + boost % when active
-    if (p.isDrafting && p.draftTier > 0) {
-      const boostPct = Math.round((0.30 + 0.10 * Math.min(p.draftTier, 4)) * 100);
+    // Draft boost indicator — label shows actual calculated boost % (speed-gated)
+    if (p.isDrafting && p.draftBoostPct > 0) {
       ctx.fillStyle = '#00ffff';
       ctx.shadowColor = '#00ffff';
       ctx.shadowBlur = 8;
       ctx.font = '8px "Press Start 2P", Courier, monospace';
-      ctx.fillText(`DRAFT +${boostPct}%`, p.x, p.y - 40);
+      ctx.fillText(`DRAFT +${p.draftBoostPct}%`, p.x, p.y - 40);
     }
     ctx.shadowBlur = 0;
   });
