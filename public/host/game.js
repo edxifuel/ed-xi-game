@@ -197,7 +197,7 @@ function updatePlayerList() {
 // Increased speeds by an additional 15% for baseline feel.
 const ENGINE_POWER = 0.0276;
 const FRICTION = 0.985;
-const TURN_SPEED = 0.065;
+const TURN_SPEED = 0.080;
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
@@ -943,9 +943,8 @@ function updatePhysics() {
       }
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
-      // AI uses simple accumulation
-      if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = p.steer;
-      p.angle += p.smoothedSteer * TURN_SPEED;
+      // AI uses direct steer from waypoint targeting
+      p.angle += p.steer * TURN_SPEED;
     }
 
     // ── Drafting Physics ──────────────────────────────────────────────────────
