@@ -906,10 +906,11 @@ function updatePhysics() {
       // ── Speed-Gated Direct Steering ───────────────────────────────────────
       // currentSpeed is declared in the outer scope (vector decomposition section)
 
-      // LOW-SPEED RAMP: 0 steering at rest, full at speed ~1.2
-      const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
-
-      // highSpeedFactor: Stiffens the wheel at high speeds to prevent twitching
+      // FIX 1: Stretch this out! Instead of maxing out at 1.2, it maxes out at a higher speed.
+      // This stops the car from pirouetting when barely moving.
+      const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0); 
+      
+      // Keeps the high-speed stability
       const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
 
       // ── 1. SANITIZE THE PHONE DATA ──────────────────────────────────────────
@@ -929,8 +930,13 @@ function updatePhysics() {
 
       // ── 2. APPLY TO YOUR PHYSICS ──────────────────────────────────────────
       
-      // CRITICAL FIX: We are now using 'p.smoothedSteer' instead of 'p.steer'
-      const rawDelta = p.smoothedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+      // FIX 2: SQUARING THE INPUT
+      // This is the secret to getting rid of the "twitch". 
+      // Small tilts become very tiny inputs. Full lock remains full lock.
+      const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
+
+      // Apply the curved steer and the wider speed factor
+      const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
       
       const MAX_DELTA = 0.038; 
       p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
