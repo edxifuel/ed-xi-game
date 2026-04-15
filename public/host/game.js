@@ -1295,14 +1295,7 @@ function drawCars() {
     ctx.shadowColor = p.color;
     ctx.fillText(p.name, p.x, p.y - 28);
 
-    // Draft boost indicator — label shows actual calculated boost % (speed-gated)
-    if (p.isDrafting && p.draftBoostPct > 0) {
-      ctx.fillStyle = '#00ffff';
-      ctx.shadowColor = '#00ffff';
-      ctx.shadowBlur = 8;
-      ctx.font = '8px "Press Start 2P", Courier, monospace';
-      ctx.fillText(`DRAFT +${p.draftBoostPct}%`, p.x, p.y - 40);
-    }
+    // Draft boost multiplier is handled computationally without visual text explicitly
     ctx.shadowBlur = 0;
   });
 }
@@ -1576,14 +1569,7 @@ function loop() {
 
   drawCars();
 
-  // DEBUG: show canvas dimensions and cache state on screen
-  const cacheKey = `${currentSettings.track}_${canvas.width}_${canvas.height}`;
-  ctx.fillStyle = 'rgba(255,255,0,0.9)';
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'left';
-  ctx.shadowBlur = 0;
-  ctx.fillText(`canvas: ${canvas.width}x${canvas.height}  players: ${Object.keys(players).length}  track: ${currentSettings.track}`, 8, canvas.height - 8);
-  ctx.fillText(`cacheKeys: ${Object.keys(cachedSplines).join(' | ')}`, 8, canvas.height - 22);
+    
 
   requestAnimationFrame(loop);
 }
