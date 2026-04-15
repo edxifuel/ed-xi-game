@@ -194,9 +194,11 @@ function updatePlayerList() {
 }
 
 // PHYSICS & RENDER LOOP
-const ENGINE_POWER = 0.024;
+// Tuned down engine power and steering to emulate the slower, "heavier" feel
+// that was present when the double-resolution bug was halving relative speeds.
+const ENGINE_POWER = 0.016; // Was 0.024
 const FRICTION = 0.985;
-const TURN_SPEED = 0.072;
+const TURN_SPEED = 0.054; // Was 0.072
 
 function drawGrid() {
   ctx.strokeStyle = 'rgba(255, 0, 85, 0.15)';
@@ -253,16 +255,36 @@ let cachedSplines = {};
 let lastCanvasSize = { w: 0, h: 0 };
 
 function getWaypoints() {
-  const w = canvas.width;
-  const h = canvas.height;
-  const cx = w / 2;
-  const cy = h / 2;
+  const cw = canvas.width;
+  const ch = canvas.height;
 
   // Cache: keyed on canvas size AND track name so a track switch always rebuilds
-  const cacheKey = `${currentSettings.track}_${w}_${h}`;
+  const cacheKey = `${currentSettings.track}_${cw}_${ch}`;
   if (cachedSplines[cacheKey]) {
      return cachedSplines[cacheKey];
   }
+
+  // Prevent track from stretching excessively on ultrawide/ultratall screens
+  const padding = 80;
+  const aspect = cw / ch;
+  
+  let safeW = cw - padding * 2;
+  let safeH = ch - padding * 2;
+  
+  if (aspect > 1.9) {
+    safeW = safeH * 1.9;
+  } else if (aspect < 1.3) {
+    safeH = safeW / 1.3;
+  }
+  
+  const drawOffsetX = (cw - safeW) / 2;
+  const drawOffsetY = (ch - safeH) / 2;
+
+  const w = safeW;
+  const h = safeH;
+  const cx = w / 2;
+  const cy = h / 2;
+
   let rawPoints = [];
   
   if (currentSettings.track === 'vika_short') {
@@ -780,6 +802,12 @@ function getWaypoints() {
     ];
   }
 
+  // Apply centering and padding offsets so kerbing never runs off screen
+  rawPoints.forEach(p => {
+    p.x += drawOffsetX;
+    p.y += drawOffsetY;
+  });
+
   // Neon ring is already an octagon and circular enough, but we can spline it.
   // Cyber square is a literal square, so we shouldn't spline it.
   if (currentSettings.track === 'cyber_square') {
@@ -1246,6 +1274,7 @@ function drawBroadcastHUD() {
     const by = ly + i * (boxH + 6);
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.beginPath();
     ctx.roundRect(bx, by, boxW, boxH, 6);
     ctx.fill();
     ctx.fillStyle = p.color;
