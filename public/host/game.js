@@ -950,8 +950,8 @@ function updatePhysics() {
         if (currentSpeed > 0.2) { 
             const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0); 
             
-            // Midpoint dampening: 0.35 (was 0.45 too slow, 0.25 too twitchy)
-            const highSpeedFactor = 1 / (1 + currentSpeed * 0.35);
+            // Midpoint dampening dialed down to 0.30 to allow a bit more steering at high speed
+            const highSpeedFactor = 1 / (1 + currentSpeed * 0.30);
 
             // Linear Input: 1:1 with the phone's physical tilt. 
             // Removed the squared curve which forced players to yank the wheel too hard, causing over-corrections.
@@ -1103,8 +1103,13 @@ function updatePhysics() {
 
     const steerMagnitude = Math.abs(p.smoothedSteer || 0);
 
-    // Smooth speed-based drifting factor (higher speeds slide more naturally)
-    const driftFactor = Math.min(currentSpeed / 4.0, 1.0); 
+    // Smooth speed-based drifting factor
+    let driftFactor = Math.min(currentSpeed / 4.0, 1.0); 
+    
+    // Core Fix: Drafting massively increases speed, which mathematically makes the kart ice-skate.
+    // We glue the tires to the road when drafting so the player retains rock-solid control.
+    if (p.isDrafting) driftFactor *= 0.2;
+    
     const baseGrip = 0.91 + (0.03 * driftFactor); // Ranges 0.91 (solid) to 0.94 (drifty)
 
     // Steering hard slightly loosens the rear to rotate through corners,
