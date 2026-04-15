@@ -890,9 +890,10 @@ function updatePhysics() {
       else if (diff < -0.15) p.steer = -1;
       else p.steer = 0;
 
-      // Rubber banding
+      // Rubber banding — but let drafting bots run free so the boost is felt
       const botSpeed = Math.hypot(p.vx, p.vy);
-      if (botSpeed > avgSpeed + 0.3) {
+      const rubberBandCap = p.isDrafting ? avgSpeed + 0.8 : avgSpeed + 0.3;
+      if (botSpeed > rubberBandCap) {
         p.gas = 0;
       } else {
         p.gas = 1;
@@ -1005,9 +1006,9 @@ function updatePhysics() {
 
     let currentPower = ENGINE_POWER;
     if (p.draftTier > 0) {
-      // Tier 1 = 25%, Tier 2 = 30%, Tier 3 = 35%, Tier 4 = 40%
-      const boostAmount = 0.20 + (0.05 * p.draftTier);
-      const cappedBoost = Math.min(boostAmount, 0.40);
+      // Tier 1 = 35%, Tier 2 = 45%, Tier 3 = 55%, Tier 4 = 65%
+      const boostAmount = 0.30 + (0.10 * p.draftTier);
+      const cappedBoost = Math.min(boostAmount, 0.65);
       currentPower = ENGINE_POWER * (1 + cappedBoost);
     }
 
