@@ -1102,9 +1102,13 @@ function updatePhysics() {
 
     const steerMagnitude = Math.abs(p.smoothedSteer || 0);
 
-    // If the player holds the phone flat (steerMagnitude is 0), friction is 0.90 (heavy grip).
-    // This instantly kills the slide and snaps the car perfectly straight.
-    let lateralFriction = 0.90 + (0.07 * steerMagnitude); 
+    // Smooth speed-based drifting factor (higher speeds slide more naturally)
+    const driftFactor = Math.min(currentSpeed / 4.0, 1.0); 
+    const baseGrip = 0.91 + (0.03 * driftFactor); // Ranges 0.91 (solid) to 0.94 (drifty)
+
+    // Steering hard slightly loosens the rear to rotate through corners,
+    // but without the extreme 0.97 slip or the violent 0.90 snap-back.
+    let lateralFriction = baseGrip + (0.02 * steerMagnitude);
     
     // Disable Snap Straight on grass to prevent violent wall-bounces
     if (onGrass) lateralFriction = 0.95;
