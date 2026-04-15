@@ -903,9 +903,13 @@ function updatePhysics() {
     // Speed is needed by both steering and lateral grip — compute once here
     const currentSpeed = Math.hypot(p.vx, p.vy);
 
-    // Pre-check grass status so steering can be restrained on grass
-    const preTrackInfo = getTrackInfo(p.x, p.y, waypoints);
-    const onGrassNow = preTrackInfo.distance > 68;
+    // Grass steering lock: use previous-frame grass flag (stored on player)
+    // because position is clamped back to boundary at the END of the physics loop,
+    // so a current-frame distance check always reads "not on grass".
+    // A 10-frame cooldown keeps steering restricted while the kart recovers from the wall.
+    if (typeof p.grassTimer === 'undefined') p.grassTimer = 0;
+    const onGrassRestricted = p.grassTimer > 0;
+    if (p.grassTimer > 0) p.grassTimer--; // count down every frame
 
     if (!p.isBot) {
       // ── 1. SANITIZE THE PHONE DATA ──────────────────────────────────────────
@@ -940,10 +944,10 @@ function updatePhysics() {
           // TURN_SPEED determines how FAST the wheel turns
           const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
 
-          // MAX_DELTA caps max angle change per frame
-          // Halved on grass: velocity is misaligned from heading at the wall,
-          // so full steering authority creates violent spins.
-          const MAX_DELTA = onGrassNow ? 0.024 : 0.048;
+          // MAX_DELTA caps max angle change per frame.
+          // Heavily restricted on grass / just after a wall bounce
+          // (wall-bounce misaligns velocity from heading, full steering authority causes spins)
+          const MAX_DELTA = onGrassRestricted ? 0.015 : 0.048;
 
           p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       }
@@ -1039,6 +1043,7 @@ function updatePhysics() {
     let onGrass = false;
     if (trackInfo.distance > HARD_WALL) {
       onGrass = true;
+      p.grassTimer = 10; // Restrict steering for 10 frames after wall contact
       // Clamp position back to grass edge
       const dx = p.x - trackInfo.closestX;
       const dy = p.y - trackInfo.closestY;
