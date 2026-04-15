@@ -939,9 +939,9 @@ function updatePhysics() {
             normalizedSteer = 0;
         }
 
-        // Low-Pass Filter: Smooth out the steering column
+        // Low-Pass Filter: Barely enough to kill hardware jitter, but zero perceptible lag (was 0.80 / 0.20)
         if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
-        p.smoothedSteer = (p.smoothedSteer * 0.80) + (normalizedSteer * 0.20);
+        p.smoothedSteer = (p.smoothedSteer * 0.40) + (normalizedSteer * 0.60);
 
 
         // ── 2. STEERING PHYSICS ───────────────────────────────────────────────────
@@ -953,10 +953,11 @@ function updatePhysics() {
             // Midpoint dampening: 0.35 (was 0.45 too slow, 0.25 too twitchy)
             const highSpeedFactor = 1 / (1 + currentSpeed * 0.35);
 
-            // Square the input so the center is steady, but hard tilts turn sharp
-            const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
+            // Linear Input: 1:1 with the phone's physical tilt. 
+            // Removed the squared curve which forced players to yank the wheel too hard, causing over-corrections.
+            const linearSteer = p.smoothedSteer;
 
-            const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+            const rawDelta = linearSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
             
             // Restore smooth max bounds
             const MAX_DELTA = onGrassRestricted ? 0.015 : 0.055;  
