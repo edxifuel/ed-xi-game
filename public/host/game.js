@@ -1027,31 +1027,31 @@ function updatePhysics() {
     p.draftTier   = pDraftTier;
     p.isDrafting  = pDraftTier > 0;
 
-    let currentPower = ENGINE_POWER;
+    let engineBonus = 0;
     if (p.draftTier > 0) {
       // Tier 1 = 18%, Tier 2 = 23%, Tier 3 = 28%, Tier 4 = 33%
-      // Hard cutoff: zero draft below speed 0.8, ramps to full at speed 1.3
-      // Recalibrated for new lower terminal velocity (~1.57)
       const DRAFT_MIN = 0.8;
       const DRAFT_MAX = 1.3;
       const draftSpeedFactor = currentSpeed < DRAFT_MIN ? 0
         : Math.min((currentSpeed - DRAFT_MIN) / (DRAFT_MAX - DRAFT_MIN), 1.0);
       const boostAmount = 0.13 + (0.05 * p.draftTier);
       const cappedBoost = Math.min(boostAmount, 0.33);
-      currentPower = ENGINE_POWER * (1 + cappedBoost * draftSpeedFactor);
-      p.draftBoostPct = Math.round(cappedBoost * draftSpeedFactor * 100); // store for label
+      engineBonus = cappedBoost * draftSpeedFactor;
+      p.draftBoostPct = Math.round(engineBonus * 100);
     } else {
       p.draftBoostPct = 0;
     }
 
     // Catch-up Rubber-banding
     if (totalRacers > 1 && p.raceRank > 1) {
-        // Boost starts at 0% for 1st place and scales to 35% for Last Place.
-        // This ensures a lone car can ALWAYS overcome a pack of leaders drafting each other (+28% boost)
         const rankRatio = (p.raceRank - 1) / (totalRacers - 1);
-        const maxCatchUpBoost = 0.35; // 35% extra engine power
-        currentPower *= (1 + (rankRatio * maxCatchUpBoost));
+        const rubberbandBonus = rankRatio * 0.35; // Scales up to 35% for Last Place
+        
+        // Take whichever multiplier is higher. This stops them from stacking exponentially!
+        if (rubberbandBonus > engineBonus) engineBonus = rubberbandBonus;
     }
+
+    let currentPower = ENGINE_POWER * (1 + engineBonus);
 
     if (p.gas === 1) {
       p.vx += Math.cos(p.angle) * currentPower;
@@ -1158,17 +1158,9 @@ function updatePhysics() {
         a.y -= ny * overlap;
         b.x += nx * overlap;
         b.y += ny * overlap;
-        // Exchange velocity along collision normal (bouncy bump)
-        // Heavily softened (was 0.55) to prevent massive lateral velocity transfer 
-        // that caused the car to violently fishtail/skid when in a pack.
-        const relVelN = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
-        if (relVelN > 0) {
-          const impulse = relVelN * 0.10; // Soft nudge instead of violent ricochet
-          a.vx -= impulse * nx;
-          a.vy -= impulse * ny;
-          b.vx += impulse * nx;
-          b.vy += impulse * ny;
-        }
+        // NOTE: We do NOT exchange pure velocities (bouncy bump impulse) anymore.
+        // Altering vx/vy artificially creates a fake "slide" mathematically which 
+        // the lateral-grip engine violently tries to snap-correct. Positional overlap pushing is enough!
       }
     }
   }
