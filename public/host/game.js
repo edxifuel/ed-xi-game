@@ -909,31 +909,30 @@ function updatePhysics() {
       // LOW-SPEED RAMP: 0 steering at rest, full at speed ~1.2
       const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
 
-      // Less aggressive reduction. Even at max speed, they keep 50% steering.
-      const highSpeedFactor = Math.max(0.5, 1 - (currentSpeed * 0.08));
+      // highSpeedFactor: Stiffens the wheel at high speeds to prevent twitching
+      const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
 
-      // ── GYRO PRE-PROCESSING & NORMALIZATION ───────────────────────────────────
+      // ── 1. SANITIZE THE PHONE DATA ──────────────────────────────────────────
+      // Squish the raw phone angle (-40 to 40 degrees) down to a safe -1.0 to 1.0
+      let safeSteer = p.steer / 40.0; 
+      safeSteer = Math.max(-1.0, Math.min(1.0, safeSteer)); // Clamp it just in case
 
-      // Let's assume p.steer is a raw degree from the phone (e.g., -45 to 45).
-      // 1. NORMALIZE: We divide by 40 so that tilting the phone 40 degrees = 100% steering.
-      let normalizedSteer = p.steer / 40.0;
-
-      // 2. CLAMP: Prevent it from going past -1 or 1, even if they flip the phone completely sideways.
-      normalizedSteer = Math.max(-1.0, Math.min(1.0, normalizedSteer));
-
-      // 3. DEADZONE: Ignore tiny hand shakes (under 15% of max tilt).
-      if (Math.abs(normalizedSteer) < 0.15) {
-          normalizedSteer = 0;
+      // Deadzone: Ignore shaky hands
+      if (Math.abs(safeSteer) < 0.15) {
+          safeSteer = 0;
       }
 
-      // 4. LOW-PASS FILTER: Smooth the input to act like a heavy steering column.
-      // (Make sure p.smoothedSteer is initialized to 0 in your car setup object!)
+      // Low-Pass Filter: Smooth out the steering
       if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
-      p.smoothedSteer = (p.smoothedSteer * 0.80) + (normalizedSteer * 0.20);
+      p.smoothedSteer = (p.smoothedSteer * 0.80) + (safeSteer * 0.20);
 
-      // Now, use p.smoothedSteer for your physics instead of p.steer!
+
+      // ── 2. APPLY TO YOUR PHYSICS ──────────────────────────────────────────
+      
+      // CRITICAL FIX: We are now using 'p.smoothedSteer' instead of 'p.steer'
       const rawDelta = p.smoothedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
-      const MAX_DELTA = 0.038;
+      
+      const MAX_DELTA = 0.038; 
       p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
