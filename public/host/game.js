@@ -903,47 +903,49 @@ function updatePhysics() {
     const currentSpeed = Math.hypot(p.vx, p.vy);
 
     if (!p.isBot) {
-      // ── Speed-Gated Direct Steering ───────────────────────────────────────
-      // currentSpeed is declared in the outer scope (vector decomposition section)
-
-      // FIX 1: Stretch this out! Instead of maxing out at 1.2, it maxes out at a higher speed.
-      // This stops the car from pirouetting when barely moving.
-      const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0); 
-      
-      // Keeps the high-speed stability
-      const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
-
       // ── 1. SANITIZE THE PHONE DATA ──────────────────────────────────────────
       // Squish the raw phone angle (-40 to 40 degrees) down to a safe -1.0 to 1.0
-      let safeSteer = p.steer / 40.0; 
-      safeSteer = Math.max(-1.0, Math.min(1.0, safeSteer)); // Clamp it just in case
+      let safeSteer = p.steer / 40.0;
+      safeSteer = Math.max(-1.0, Math.min(1.0, safeSteer));
 
       // Deadzone: Ignore shaky hands
       if (Math.abs(safeSteer) < 0.15) {
           safeSteer = 0;
       }
 
-      // Low-Pass Filter: Smooth out the steering
+      // Low-Pass Filter: Smooth out the steering (always runs so there's no lag on takeoff)
       if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = 0;
       p.smoothedSteer = (p.smoothedSteer * 0.80) + (safeSteer * 0.20);
 
-
       // ── 2. APPLY TO YOUR PHYSICS ──────────────────────────────────────────
-      
-      // FIX 2: SQUARING THE INPUT
-      // This is the secret to getting rid of the "twitch". 
-      // Small tilts become very tiny inputs. Full lock remains full lock.
-      const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
 
-      // Apply the curved steer and the wider speed factor
-      const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
-      
-      const MAX_DELTA = 0.038; 
-      p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
+      // THE HARD LOCK: If the car is barely moving, completely ignore steering.
+      // This instantly cures low-speed parking-lot twitch.
+      if (currentSpeed > 0.2) {
+
+          // Stretch the ramp so it takes longer to hit max turning power
+          const lowSpeedFactor = Math.min(currentSpeed / 3.0, 1.0);
+
+          // Keeps high-speed stability
+          const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
+
+          // Square the input to give a heavy center and sharp edges
+          const curvedSteer = p.smoothedSteer * Math.abs(p.smoothedSteer);
+
+          // TURN_SPEED determines how FAST the wheel turns
+          const rawDelta = curvedSteer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
+
+          // MAX_DELTA determines the absolute maximum angle change per frame.
+          // INCREASE THIS if you increased TURN_SPEED, otherwise it will clip and feel jerky!
+          const MAX_DELTA = 0.055;
+
+          p.angle += Math.max(-MAX_DELTA, Math.min(MAX_DELTA, rawDelta));
+      }
       // ── End Steering ──────────────────────────────────────────────────────
     } else {
       // AI uses simple accumulation
-      p.angle += p.steer * TURN_SPEED;
+      if (typeof p.smoothedSteer === 'undefined') p.smoothedSteer = p.steer;
+      p.angle += p.smoothedSteer * TURN_SPEED;
     }
 
     // ── Drafting Physics ──────────────────────────────────────────────────────
