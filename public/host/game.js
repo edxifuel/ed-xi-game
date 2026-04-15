@@ -949,9 +949,10 @@ function updatePhysics() {
       p.x = trackInfo.closestX + nx * HARD_WALL;
       p.y = trackInfo.closestY + ny * HARD_WALL;
 
-      // Strip inward velocity component so kart slides along wall cleanly
+      // Strip outward velocity component so kart slides along wall cleanly,
+      // but still allows driving back inward toward the track!
       const velDotNormal = p.vx * nx + p.vy * ny;
-      if (velDotNormal < 0) {
+      if (velDotNormal > 0) {
         p.vx -= velDotNormal * nx;
         p.vy -= velDotNormal * ny;
       }
