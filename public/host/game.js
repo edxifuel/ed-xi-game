@@ -1,5 +1,49 @@
 const socket = io();
 
+// ── Firebase Global Leaderboard Setup ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyB13irWVrTG6NLqyNMDfDyzXdw5qJBsJEg",
+  authDomain: "retro-velocity.firebaseapp.com",
+  projectId: "retro-velocity",
+  storageBucket: "retro-velocity.firebasestorage.app",
+  messagingSenderId: "204991291080",
+  appId: "1:204991291080:web:6077413b9094fea6894ffd",
+  measurementId: "G-PWBH27WREG"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let topLeaderboard = [];
+let leaderboardListener = null;
+
+function watchLeaderboard(trackName) {
+  if (!db || !trackName) return;
+  if (leaderboardListener) leaderboardListener(); // Unsubscribe previous
+  
+  leaderboardListener = db.collection('leaderboards').doc(trackName).collection('laps')
+    .orderBy('time', 'asc')
+    .limit(10)
+    .onSnapshot(snapshot => {
+       topLeaderboard = [];
+       snapshot.forEach(doc => topLeaderboard.push(doc.data()));
+    }, err => {
+       console.error("Firebase Leaderboard read failed:", err);
+    });
+}
+
+function submitLapToLeaderboard(playerName, lapTime, trackName) {
+  if (!db || !trackName) return;
+  // Exclude AI Bots
+  if (playerName.startsWith('CPU-')) return;
+
+  const docRef = db.collection('leaderboards').doc(trackName);
+  docRef.collection('laps').add({
+    name: playerName,
+    time: lapTime,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  }).catch(err => console.error("Firebase write failed:", err));
+}
+
 const roomCodeDisplay = document.getElementById('room-code-display');
 const playerList = document.getElementById('player-list');
 const canvas = document.getElementById('gameCanvas');
@@ -30,6 +74,7 @@ let sessionEndsAt = 0;
 
 let gameState = 'lobby';
 let currentSettings = { track: 'vika_short', racers: 2 };
+watchLeaderboard(currentSettings.track);
 let lobbyText = "VIP IS SELECTING TRACK RULES";
 
 socket.emit('hostCreate');
@@ -87,8 +132,10 @@ socket.on('settingsUpdated', (settings) => {
   // If currentSettings.track changes mid-race, getWaypoints() rebuilds the
   // spline at different coordinates and causes the two-track overlay bug.
   if (gameState === 'lobby' || gameState === 'waiting_players') {
+    const trackChanged = currentSettings.track !== settings.track;
     currentSettings = settings;
     cachedSplines = {}; // force rebuild at correct canvas size
+    if (trackChanged) watchLeaderboard(currentSettings.track);
   }
 });
 
@@ -879,10 +926,12 @@ function updatePhysics() {
     
     if (dist < 120) {
       const nextWp = (p.targetWaypoint + 1) % waypoints.length;
-      // If crossing waypoint 0 AND they have driven most of the track, log a lap!
       if (nextWp === 0 && p.targetWaypoint > waypoints.length * 0.7) {
         const lapTime = Date.now() - p.lastLapMark;
-        if (lapTime < p.fastestLap) p.fastestLap = lapTime;
+        if (lapTime < p.fastestLap) {
+            p.fastestLap = lapTime;
+            submitLapToLeaderboard(p.name, lapTime, currentSettings.track);
+        }
         p.lapsCompleted++;
         p.lastLapMark = Date.now();
       }
@@ -1565,6 +1614,27 @@ function loop() {
     ctx.shadowColor = '#fff';
     ctx.fillText(lobbyText, canvas.width/2, canvas.height - 40);
     ctx.shadowBlur = 0;
+
+    // Draw Global Leaderboard for the track
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ff0055';
+    ctx.font = '20px "Press Start 2P", Courier, monospace';
+    ctx.fillText('GLOBAL TOP 10', 40, 60);
+    ctx.font = '12px "Press Start 2P", Courier, monospace';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`TRACK: ${currentSettings.track.toUpperCase()}`, 40, 90);
+    
+    if (topLeaderboard.length > 0) {
+      topLeaderboard.forEach((lap, idx) => {
+        const rowY = 130 + idx * 30;
+        ctx.fillStyle = idx === 0 ? '#00ffff' : '#aaa'; // Highlight #1
+        ctx.fillText(`${(idx + 1).toString().padStart(2, '0')}. ${lap.name}`, 40, rowY);
+        ctx.fillText(formatLapTime(lap.time), 220, rowY);
+      });
+    } else {
+      ctx.fillStyle = '#666';
+      ctx.fillText('NO RACE RECORDS YET', 40, 130);
+    }
   }
 
   drawCars();
