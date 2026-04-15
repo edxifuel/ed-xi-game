@@ -47,24 +47,12 @@ if (codeParam) {
   currentRoomCode = codeParam.toUpperCase();
   roomCodeWrapper.style.display = 'none';
   
-  // iOS Apple WebKit strictly blocks gyroscope access unless activated by a direct button tap.
-  // Android allows instant auto-connect.
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      joinBtn.innerText = `TAP TO JOIN ${currentRoomCode}`;
-  } else {
-      // Non-iOS devices: Auto Join!
-      joinBtn.style.display = 'none'; 
-      const autoName = savedName ? savedName : 'RACER';
-      
-      if (socket.connected) {
-          socket.emit('controllerJoin', { code: currentRoomCode, name: autoName });
-      } else {
-          socket.on('connect', () => {
-              socket.emit('controllerJoin', { code: currentRoomCode, name: autoName });
-          });
-      }
-  }
+  // We no longer auto-join on Android. We force ALL devices to tap the join button manually.
+  // This ensures the "Driver Name" input field remains fully accessible before connecting,
+  // while also satisfying iOS's strict requirement for a physical tap to enable gyroscope data.
+  joinBtn.innerText = `JOIN ${currentRoomCode}`;
 }
+
 
 // JOIN LOGIC
 joinBtn.addEventListener('click', async () => {
