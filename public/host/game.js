@@ -909,8 +909,8 @@ function updatePhysics() {
       // LOW-SPEED RAMP: 0 steering at rest, full at speed ~1.2
       const lowSpeedFactor = Math.min(currentSpeed / 1.2, 1.0);
 
-      // HIGH-SPEED REDUCTION: prevents spin-outs at top speed
-      const highSpeedFactor = 1 / (1 + currentSpeed * 0.45);
+      // Less aggressive reduction. Even at max speed, they keep 50% steering.
+      const highSpeedFactor = Math.max(0.5, 1 - (currentSpeed * 0.08));
 
       // Clamp max heading change per frame
       const rawDelta = p.steer * TURN_SPEED * lowSpeedFactor * highSpeedFactor;
@@ -1018,12 +1018,17 @@ function updatePhysics() {
     const lateralVel  = -p.vx * sinA + p.vy * cosA;   // +ve = sliding right
 
     // Lateral grip: keeps kart on its heading without killing speed.
-    // Base 0.94 means minimal sideways slip at low speed.
-    // Drift 0.97 allows a little more slide at top speed.
-    const LATERAL_GRIP_BASE = 0.94;
-    const LATERAL_GRIP_DRIFT = 0.97;
+    const LATERAL_GRIP_BASE = 0.92; // Tighter base grip
+    const LATERAL_GRIP_DRIFT = 0.95; // Less slide at high speeds
     const driftFactor = Math.min(currentSpeed / 4, 1);
-    const lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
+    let lateralFriction = LATERAL_GRIP_BASE + (LATERAL_GRIP_DRIFT - LATERAL_GRIP_BASE) * driftFactor;
+
+    // ── THE "SNAP OUT" ASSIST ──
+    // If the player isn't steering hard (wheel is mostly straight)
+    // immediately give them massive grip to kill the slide.
+    if (Math.abs(p.steer) < 0.2) {
+        lateralFriction = 0.85; // Heavy friction to snap the car straight
+    }
 
     // Apply separate friction to each axis (longitudinal rolls freely, lateral grips)
     const newForward = forwardVel * currentFriction;
