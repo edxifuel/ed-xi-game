@@ -91,6 +91,15 @@ function generateSpline(points, resolution = 15) {
   return spline;
 }
 
+let trackWidthMode = 'wide';
+
+if (document.getElementById('trackWidthSelect')) {
+  document.getElementById('trackWidthSelect').addEventListener('change', (e) => {
+    trackWidthMode = e.target.value;
+    render();
+  });
+}
+
 function render() {
   ctx.fillStyle = '#111';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -118,13 +127,15 @@ function render() {
   // Make track transparent so the underlying map image remains visible!
   ctx.globalAlpha = 0.4;
 
+  const widthMult = trackWidthMode === 'narrow' ? 0.75 : 1.0;
+
   // Grass
   ctx.beginPath();
   ctx.moveTo(sp[0].x, sp[0].y);
   for(let i=1; i<sp.length; i++) ctx.lineTo(sp[i].x, sp[i].y);
   ctx.closePath();
   ctx.strokeStyle = 'rgba(45, 90, 39, 0.8)';
-  ctx.lineWidth = 110;
+  ctx.lineWidth = 110 * widthMult;
   ctx.stroke();
 
   // Asphalt
@@ -133,7 +144,7 @@ function render() {
   for(let i=1; i<sp.length; i++) ctx.lineTo(sp[i].x, sp[i].y);
   ctx.closePath();
   ctx.strokeStyle = 'rgba(51, 51, 51, 0.9)';
-  ctx.lineWidth = 80;
+  ctx.lineWidth = 80 * widthMult;
   ctx.stroke();
 
   // Start/Finish Line Render (Only visible if we have enough points)
@@ -148,8 +159,8 @@ function render() {
       const nx = -dy / dist;
       const ny = dx / dist;
       ctx.beginPath();
-      ctx.moveTo(p0.x + nx * 40, p0.y + ny * 40);
-      ctx.lineTo(p0.x - nx * 40, p0.y - ny * 40);
+      ctx.moveTo(p0.x + nx * (40 * widthMult), p0.y + ny * (40 * widthMult));
+      ctx.lineTo(p0.x - nx * (40 * widthMult), p0.y - ny * (40 * widthMult));
       ctx.strokeStyle = '#FFF';
       ctx.lineWidth = 4;
       ctx.stroke();
