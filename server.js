@@ -89,6 +89,9 @@ io.on('connection', (socket) => {
       if (room.status === 'waiting_players' && Object.keys(room.players).length === room.settings.racers) {
         room.status = 'racing';
         io.to(roomCode).emit('raceStart', room.settings);
+      } else if (room.status === 'racing' || room.status === 'qualifying') {
+        // If a player disconnected and silently reconnected, jump them straight back in!
+        socket.emit('raceStart', room.settings);
       }
 
       console.log(`Controller joined room ${roomCode} as ${color}`);

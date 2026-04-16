@@ -21,6 +21,14 @@ let currentRoomCode = '';
 let myColor = '';
 let isConnected = false;
 
+// If the device goes to sleep or drops the websocket silently, re-handshake automatically
+socket.on('connect', () => {
+  if (isConnected && currentRoomCode) {
+    const driverName = localStorage.getItem('edxi_driver_name') || 'RACER';
+    socket.emit('controllerJoin', { code: currentRoomCode, name: driverName });
+  }
+});
+
 // Controller State
 let padSteer = 0;
 let padGas = 0; // 0 = Coast, 1 = Gas, -1 = Brake
@@ -113,8 +121,10 @@ socket.on('joinSuccess', (data) => {
   if (data.isVip) {
     vipScreen.classList.add('active');
     
-    trackSelect.addEventListener('change', sendSettingsUpdate);
-    racerSelect.addEventListener('change', sendSettingsUpdate);
+    ['change', 'input'].forEach(evt => {
+      trackSelect.addEventListener(evt, sendSettingsUpdate);
+      racerSelect.addEventListener(evt, sendSettingsUpdate);
+    });
     
     confirmBtn.addEventListener('click', () => {
       socket.emit('confirmSettings', currentRoomCode);
