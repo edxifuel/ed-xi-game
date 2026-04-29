@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const os = require('os');
 
 const app = express();
 const server = http.createServer(app);
@@ -185,5 +186,19 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`\n=========================================`);
+  console.log(`🏁 RETRO VELOCITY SERVER ONLINE 🏁`);
+  console.log(`=========================================`);
+  console.log(`Local Access:  http://localhost:${PORT}`);
+  
+  // Find local network IP to display for mobile QR code testing
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        console.log(`Network (QR):  http://${iface.address}:${PORT}`);
+      }
+    }
+  }
+  console.log(`=========================================\n`);
 });
