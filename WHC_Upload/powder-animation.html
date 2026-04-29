@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Powder Animation</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #030305;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="animCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('animCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 400;
+        canvas.height = 600;
+
+        let frame = 0;
+        let state = 'waiting'; // waiting, dropping, fizzing
+        
+        const glass = {
+            x: 100, y: 300, w: 200, h: 250,
+            waterLevel: 400, // starts at 400 (y coordinate)
+            color: 'rgba(50, 100, 255, 0.2)'
+        };
+
+        const powderParticles = [];
+        const bubbles = [];
+
+        function init() {
+            setTimeout(() => { state = 'dropping'; }, 500);
+            animate();
+        }
+
+        function createPowder() {
+            if (Math.random() < 0.6) {
+                for (let i=0; i<3; i++) {
+                    powderParticles.push({
+                        x: 200 + (Math.random() * 40 - 20),
+                        y: 100,
+                        vx: Math.random() * 2 - 1,
+                        vy: Math.random() * 5 + 5,
+                        size: Math.random() * 3 + 1,
+                        color: Math.random() > 0.5 ? '#B533FF' : '#FF33A1'
+                    });
+                }
+            }
+        }
+
+        function createBubbles() {
+            if (Math.random() < 0.4) {
+                for (let i=0; i<2; i++) {
+                    bubbles.push({
+                        x: glass.x + 10 + Math.random() * (glass.w - 20),
+                        y: glass.y + glass.h - 10,
+                        vx: Math.random() * 1 - 0.5,
+                        vy: -(Math.random() * 3 + 1),
+                        size: Math.random() * 4 + 2,
+                        color: 'rgba(255, 255, 255, 0.6)'
+                    });
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw glass
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(glass.x, glass.y);
+            ctx.lineTo(glass.x + 10, glass.y + glass.h);
+            ctx.lineTo(glass.x + glass.w - 10, glass.y + glass.h);
+            ctx.lineTo(glass.x + glass.w, glass.y);
+            ctx.stroke();
+
+            // Draw water
+            let waterGradient = ctx.createLinearGradient(0, glass.waterLevel, 0, glass.y + glass.h);
+            if (state === 'fizzing') {
+                // Glowy pink/purple water
+                waterGradient.addColorStop(0, 'rgba(255, 51, 161, 0.8)');
+                waterGradient.addColorStop(1, 'rgba(181, 51, 255, 0.8)');
+            } else {
+                // Normal water
+                waterGradient.addColorStop(0, 'rgba(0, 150, 255, 0.3)');
+                waterGradient.addColorStop(1, 'rgba(0, 100, 255, 0.5)');
+            }
+            
+            ctx.fillStyle = waterGradient;
+            ctx.beginPath();
+            ctx.moveTo(glass.x + 4, glass.waterLevel);
+            ctx.lineTo(glass.x + 8, glass.y + glass.h - 2);
+            ctx.lineTo(glass.x + glass.w - 8, glass.y + glass.h - 2);
+            ctx.lineTo(glass.x + glass.w - 4, glass.waterLevel);
+            ctx.fill();
+
+            if (state === 'dropping') {
+                createPowder();
+                // Stop dropping after a bit
+                if (frame > 100) {
+                    state = 'fizzing';
+                }
+            }
+
+            if (state === 'fizzing') {
+                createBubbles();
+            }
+
+            // Update & Draw Powder
+            for (let i = powderParticles.length - 1; i >= 0; i--) {
+                let p = powderParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+
+                if (p.y > glass.waterLevel) {
+                    powderParticles.splice(i, 1); // remove when hits water
+                }
+            }
+
+            // Update & Draw Bubbles
+            for (let i = bubbles.length - 1; i >= 0; i--) {
+                let b = bubbles[i];
+                b.x += b.vx;
+                b.y += b.vy;
+                b.x += Math.sin(frame * 0.1 + b.y) * 1; // wobble
+                
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size, 0, Math.PI*2);
+                ctx.fill();
+
+                if (b.y < glass.waterLevel) {
+                    bubbles.splice(i, 1); // remove when reaches surface
+                }
+            }
+
+            frame++;
+            if (frame < 300) {
+                requestAnimationFrame(animate);
+            } else {
+                // Done
+                document.body.innerHTML += "<div id='done' style='display:none;'>done</div>";
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

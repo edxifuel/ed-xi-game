@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host - Retro Velocity</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="ui-layer">
+    <div class="hud">
+      <div id="room-info">
+        <h3>ROOM CODE</h3>
+        <h1 id="room-code-display">----</h1>
+        <div id="qr-code"></div>
+        <p style="font-size: 0.6rem; margin-top: 10px; color: #aaa;">Scan to Join</p>
+      </div>
+      <div id="player-list">
+        <!-- Connecting players show here -->
+      </div>
+    </div>
+  </div>
+  
+  <canvas id="gameCanvas"></canvas>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ED-XI Track Editor</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #00FFDD;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    #toolbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50px;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 20px;
+      z-index: 100;
+      border-bottom: 2px solid #FF0055;
+    }
+    #canvas-container {
+      position: absolute;
+      top: 52px; left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    canvas {
+      border: 1px solid #333;
+      background: #111;
+      cursor: crosshair;
+    }
+    button, input {
+      background: #222;
+      color: #FFF;
+      border: 1px solid #00FFDD;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button:hover { background: #00FFDD; color: #000; }
+  </style>
+</head>
+<body>
+
+  <div id="toolbar">
+    <label>Upload Track Image (Opt): <input type="file" id="imgLoader" accept="image/*"></label>
+    <label>Width Option: 
+      <select id="trackWidthSelect">
+        <option value="wide">Wide (Default)</option>
+        <option value="narrow">Narrow (-25%)</option>
+      </select>
+    </label>
+    <button id="undoBtn">Undo Point</button>
+    <button id="clearBtn">Clear All</button>
+    <button id="exportBtn">Export JSON</button>
+    <div id="status" style="color: #FF0055;"></div>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+  </div>
+
+  <script src="editor.js"></script>
+</body>
+</html>

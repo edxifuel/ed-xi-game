@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Ensure mobile views map 1:1, disable user zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Controller - Retro Velocity</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="assets/f1_wheel.png">
+  <link rel="manifest" href="manifest.json">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- PORTRAIT WARNING -->
+  <div id="portrait-lock" class="portrait-lock">
+    <div class="rotate-icon">↺</div>
+    <h1>ROTATE DEVICE</h1>
+    <p>Please hold your phone horizontally like a steering wheel.</p>
+  </div>
+
+  <!-- JOIN SCREEN -->
+  <div id="join-screen" class="screen active">
+    <div class="grid-overlay"></div>
+    <h1>SETUP YOUR RIG</h1>
+    
+    <div class="input-group" id="room-code-wrapper">
+      <label for="room-code-input">ROOM CODE</label>
+      <input type="text" id="room-code-input" maxlength="4" placeholder="----" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    </div>
+    
+    <div class="input-group">
+      <label for="driver-name-input">DRIVER NAME</label>
+      <input type="text" id="driver-name-input" maxlength="12" placeholder="AXL" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    </div>
+
+    <button id="join-btn" class="btn btn-pink">START ENGINE</button>
+    <div id="error-msg"></div>
+  </div>
+
+  <!-- VIP SCREEN -->
+  <div id="vip-screen" class="screen">
+    <div class="grid-overlay"></div>
+    <h1>VIP SETTINGS</h1>
+    <div class="input-group">
+      <label>SELECT TRACK</label>
+      <select id="track-select">
+        <option value="vika_short">VIKA SHORT</option>
+        <option value="vika_long">VIKA LONG</option>
+        <option value="kartplex">KARTPLEX</option>
+        <option value="cariboo">CARIBOO RACEWAY PARK</option>
+        <option value="west_coast">WEST COAST KART CLUB</option>
+        <option value="sima">SIMA KARTING</option>
+        <option value="quesnel">QUESNEL KART TRACK</option>
+        <option value="neon_ring">NEON RING</option>
+        <option value="cyber_square">CYBER SQUARE</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>TOTAL RACERS</label>
+      <select id="racer-select">
+        <option value="2">2 RACERS</option>
+        <option value="3">3 RACERS</option>
+        <option value="4">4 RACERS</option>
+        <option value="5">5 RACERS</option>
+        <option value="8">8 RACERS</option>
+      </select>
+    </div>
+    <button id="confirm-btn" class="btn btn-pink">CONFIRM RULES</button>
+  </div>
+
+  <!-- WAIT SCREEN -->
+  <div id="wait-screen" class="screen">
+    <div class="grid-overlay"></div>
+    <div id="wait-msg">
+      <h2>WAITING...</h2>
+      <p style="color: #aaa; text-align: center; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; line-height: 1.5; margin-top: 20px;">The VIP is configuring the race.</p>
+    </div>
+    <button id="force-start-btn" class="btn btn-pink" style="display: none; margin-top: 30px; font-size: 0.8rem;">FORCE START WITH A.I. RACERS</button>
+  </div>
+
+  <!-- GAMEPAD SCREEN -->
+  <div id="gamepad-screen" class="screen">
+    <div class="status-bar">
+      <div class="color-indicator" id="player-color-box"></div>
+      <div id="connection-status">CONNECTED</div>
+    </div>
+    
+    <div id="speedometer-container">
+      <span id="speed-val">000</span><span class="speed-unit">KM/H</span>
+    </div>
+
+    <div class="instruction">
+      <p>TAP L/R TO STEER</p>
+      <p>TAP BOTH TO BRAKE</p>
+    </div>
+
+    <!-- COCKPIT UI -->
+    <div class="cockpit" id="cockpit-area">
+      <div class="pedal-zone left-zone" id="brake-pedal">
+        <div class="pedal brake">BRAKE</div>
+      </div>
+      
+      <div class="steering-column">
+        <img id="steering-wheel" src="assets/f1_wheel.png" alt="F1 Wheel">
+      </div>
+
+      <div class="pedal-zone right-zone" id="gas-pedal">
+        <div class="pedal gas">GAS</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

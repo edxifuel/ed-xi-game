@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro Velocity - Splash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-pink: #FF0055;
+      --neon-blue: #00FFDD;
+      --bg-color: #050510;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-image: 
+        linear-gradient(rgba(0, 255, 221, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 221, 0.1) 1px, transparent 1px);
+      background-size: 40px 40px;
+      perspective: 800px;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      bottom: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: 
+        linear-gradient(rgba(255, 0, 85, 0.3) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255, 0, 85, 0.3) 2px, transparent 2px);
+      background-size: 60px 60px;
+      transform: rotateX(60deg);
+      z-index: -1;
+      animation: moveGrid 3s linear infinite;
+    }
+
+    @keyframes moveGrid {
+      0% { transform: rotateX(60deg) translateY(0); }
+      100% { transform: rotateX(60deg) translateY(60px); }
+    }
+
+    .boot-logo {
+      max-width: 80%;
+      width: 400px;
+      margin-bottom: 3rem;
+      filter: drop-shadow(0 0 10px var(--neon-pink));
+      animation: pulseLogo 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseLogo {
+      from { filter: drop-shadow(0 0 10px var(--neon-pink)); transform: scale(1); }
+      to { filter: drop-shadow(0 0 25px var(--neon-pink)); transform: scale(1.02); }
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+      border: 2px solid var(--neon-blue);
+      box-shadow: inset 0 0 15px rgba(0, 255, 221, 0.5), 0 0 15px rgba(0, 255, 221, 0.5);
+      background: rgba(0, 255, 221, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover, .btn:focus {
+      background: var(--neon-blue);
+      color: #000;
+      box-shadow: 0 0 30px var(--neon-blue);
+      transform: scale(1.05);
+      outline: none;
+    }
+
+    .btn-pink {
+      border-color: var(--neon-pink);
+      box-shadow: inset 0 0 15px rgba(255, 0, 85, 0.5), 0 0 15px rgba(255, 0, 85, 0.5);
+      background: rgba(255, 0, 85, 0.1);
+    }
+
+    .btn-pink:hover, .btn-pink:focus {
+      background: var(--neon-pink);
+      color: #fff;
+      box-shadow: 0 0 30px var(--neon-pink);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  <img src="/1000005986.png" alt="Retro Velocity" class="boot-logo">
+  <div class="btn-container">
+    <a href="/host/index.html" class="btn btn-blue" tabindex="1">HOST GAME (TV)</a>
+    <a href="/controller/index.html" class="btn btn-pink" tabindex="2">JOIN GAME (MOBILE)</a>
+  </div>
+
+  <script>
+    // Smart TV Remote D-Pad Navigation Support
+    const btns = document.querySelectorAll('.btn');
+    let currentIndex = 0;
+
+    // Focus the Host button by default since they are on the TV
+    if (btns.length > 0) btns[0].focus();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        currentIndex = (currentIndex + 1) % btns.length;
+        btns[currentIndex].focus();
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        currentIndex = (currentIndex - 1 + btns.length) % btns.length;
+        btns[currentIndex].focus();
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
