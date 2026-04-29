@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Powder | ED-XI & ED-XV</title>
+    <meta name="description" content="Experience the Antigravity Bloom. The new effervescent powder formula that defies gravity and lifts the brain fog.">
+    <style>
+        /* RESET & BASICS */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #030305; color: #ffffff; line-height: 1.6; overflow-x: hidden; }
+
+        :root {
+            --neon-orange: #FF6B00; 
+            --neon-blue: #0055FF; 
+            --zen-cyan: #00FFFF;
+            --ag-purple: #B533FF;
+            --ag-pink: #FF33A1;
+        }
+
+        /* NAV */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(3, 3, 5, 0.85); backdrop-filter: blur(15px); position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .logo img { height: 60px; width: auto; transition: transform 0.3s; }
+        .logo:hover img { transform: scale(1.05); }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; transition: color 0.3s, text-shadow 0.3s; }
+        .nav-links a:hover { color: var(--ag-purple); text-shadow: 0 0 10px var(--ag-purple); }
+
+        /* HERO SECTION */
+        .hero {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; text-align: center; padding: 180px 20px 80px;
+            background: radial-gradient(circle at center, rgba(181, 51, 255, 0.15) 0%, #030305 70%);
+            overflow: hidden;
+        }
+        
+        /* Floating particles effect for "effervescent" feel */
+        .particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            animation: floatUp 8s infinite ease-in;
+            opacity: 0;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100px) scale(0.5); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-500px) scale(1.5); opacity: 0; }
+        }
+
+        .hero-content { position: relative; z-index: 2; max-width: 900px; }
+        .hero-badge {
+            display: inline-block; padding: 8px 20px; border-radius: 30px; 
+            background: rgba(181, 51, 255, 0.1); border: 1px solid rgba(181, 51, 255, 0.4);
+            color: var(--ag-purple); font-size: 0.85rem; font-weight: bold; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 25px; box-shadow: 0 0 20px rgba(181, 51, 255, 0.2);
+        }
+
+        .hero h1 { 
+            font-size: 5.5rem; text-transform: uppercase; line-height: 0.95; margin-bottom: 25px; font-weight: 900; 
+            background: linear-gradient(135deg, #fff 0%, var(--ag-purple) 50%, var(--ag-pink) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 10px 30px rgba(181, 51, 255, 0.3));
+        }
+
+        .hero p { font-size: 1.2rem; color: #b0b0c0; max-width: 600px; margin: 0 auto 40px; font-weight: 300; }
+
+        /* THE ACTIVATION SECTION */
+        .activation-section {
+            padding: 60px 5% 100px; position: relative; z-index: 2;
+            background: linear-gradient(to bottom, #030305, #08080c);
+        }
+        
+        .section-header { text-align: center; margin-bottom: 80px; }
+        .section-header h2 { font-size: 3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .section-header span { color: var(--ag-purple); }
+        .section-header p { color: #888; max-width: 700px; margin: 20px auto 0; font-size: 1.1rem; }
+
+        .glass-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 40px 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+        }
+        
+        .glass-card:hover { 
+            transform: translateY(-10px); 
+            border-color: rgba(181, 51, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(181, 51, 255, 0.1);
+        }
+        .glass-card:hover::before { opacity: 1; transform: rotate(10deg); }
+
+        .card-icon { font-size: 2.5rem; margin-bottom: 20px; display: inline-block; }
+        .card-title { font-size: 1.4rem; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; color: #fff; }
+        .card-text { color: #a0a0b0; font-size: 1rem; line-height: 1.7; }
+        
+        .card-highlight { color: var(--ag-pink); font-weight: bold; }
+
+        /* SPLIT SECTION: ED-XI & ED-XV */
+        .formulas-section { padding: 100px 0; display: flex; flex-wrap: wrap; background: #030305; border-top: 1px solid rgba(255,255,255,0.05); }
+        
+        .formula-half {
+            flex: 1; min-width: 350px; padding: 80px 10%; position: relative; overflow: hidden;
+            transition: 0.5s ease;
+        }
+        
+        .ed-xi-side { border-right: 1px solid rgba(255,255,255,0.05); }
+        
+        /* Subtle glowing backgrounds */
+        .ed-xi-side::before { content:''; position:absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at top left, rgba(255, 107, 0, 0.05), transparent 70%); pointer-events:none; }
+        .ed-xv-side::before { content:''; position:absolute; top:0; right:0; width:100%; height:100%; background: radial-gradient(circle at top right, rgba(0, 255, 255, 0.05), transparent 70%); pointer-events:none; }
+
+        .formula-half:hover { background: rgba(255,255,255,0.02); }
+
+        .fh-label { font-family: 'Courier New', monospace; font-size: 0.85rem; letter-spacing: 3px; margin-bottom: 20px; display: block; }
+        .ed-xi-side .fh-label { color: var(--neon-orange); }
+        .ed-xv-side .fh-label { color: var(--zen-cyan); }
+
+        .fh-title { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin-bottom: 30px; line-height: 1.1; }
+        .fh-block { margin-bottom: 30px; }
+        .fh-block h4 { font-size: 1.1rem; color: #fff; margin-bottom: 10px; text-transform: uppercase; }
+        .fh-block p { color: #999; font-size: 0.95rem; }
+
+        /* FOOTER */
+        footer { background: #000; padding: 40px; text-align: center; border-top: 1px solid #111; color: #555; font-size: 0.85rem; }
+
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 3.5rem; }
+            .formulas-section { flex-direction: column; }
+            .ed-xi-side { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .glass-cards { grid-template-columns: 1fr; padding: 0 20px; }
+            .formula-half { padding: 60px 5%; }
+        }
+
+        /* SHORT-FORM VIDEO UI */
+        .video-container {
+            position: relative; width: 100%; max-width: 380px; margin: 60px auto 20px;
+            border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(181, 51, 255, 0.3);
+            aspect-ratio: 9/16; border: 1px solid rgba(255,255,255,0.1); background: #000;
+        }
+        .bg-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+            animation: imgCycle 12s infinite; opacity: 0;
+        }
+        .bg-img:nth-child(1) { animation-delay: 0s; }
+        .bg-img:nth-child(2) { animation-delay: 3s; }
+        .bg-img:nth-child(3) { animation-delay: 6s; }
+        .bg-img:nth-child(4) { animation-delay: 9s; }
+
+        @keyframes imgCycle {
+            0%, 20% { opacity: 1; }
+            25%, 95% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .tiktok-ui {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 20%, transparent 70%, rgba(0,0,0,0.9) 100%);
+        }
+        .tiktok-text {
+            position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+            width: 90%; height: auto; min-height: 60px;
+        }
+        .overlay-text {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 12px;
+            color: #fff; font-size: 1.15rem; font-weight: 800; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; line-height: 1.3;
+            animation: textCycle 12s infinite cubic-bezier(0.4, 0, 0.2, 1); opacity: 0;
+        }
+        .overlay-text:nth-child(1) { animation-delay: 0s; }
+        .overlay-text:nth-child(2) { animation-delay: 3s; }
+        .overlay-text:nth-child(3) { animation-delay: 6s; }
+        .overlay-text:nth-child(4) { animation-delay: 9s; }
+
+        @keyframes textCycle {
+            0%, 5% { opacity: 0; transform: translateY(15px) scale(0.95); }
+            10%, 20% { opacity: 1; transform: translateY(0) scale(1); }
+            25%, 100% { opacity: 0; transform: translateY(-15px) scale(0.95); }
+        }
+        .tiktok-footer { position: absolute; bottom: 25px; left: 20px; text-align: left; }
+        .tiktok-footer h4 { margin: 0 0 5px; font-size: 1.1rem; color: #fff; text-shadow: 1px 1px 3px #000; letter-spacing: 1px; }
+        .tiktok-footer p { margin: 0; font-size: 0.9rem; color: #ddd; text-shadow: 1px 1px 3px #000; }
+        .tiktok-icons { position: absolute; bottom: 25px; right: 15px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .t-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="logo.jpg" alt="ED-XI Logo"></a>
+        <div class="nav-links">
+            <a href="shop.html">Shop</a>
+            <a href="edxv.html">ED-XV</a>
+            <a href="antigravity.html" style="color: var(--ag-purple); text-shadow: 0 0 10px rgba(181,51,255,0.5);">Antigravity</a>
+            <a href="science.html">Science</a>
+            <a href="data.html">Data</a>
+            <a href="partners.html">Team</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="game.html" style="color: var(--neon-orange);">RACING GAME</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="particles" id="particles"></div>
+        <div class="hero-content">
+            <div class="hero-badge">THE POWDER EVOLUTION</div>
+            <h1>ANTIGRAVITY</h1>
+            <p>The effervescent matrix that defies gravity. Watch the bloom, drop the weight, and find your frictionless flow state.</p>
+        </div>
+    </div>
+
+    <section class="activation-section">
+        <div class="section-header">
+            <h2>The Antigravity <span>Activation</span></h2>
+            <p>Why does it fizz? The Potassium Bicarbonate buffer doesn't just look incredible—it guarantees easy digestion and instantly bioavailable nootropics. It turns a chemical reaction into a premium lift.</p>
+            <div class="video-container">
+                <img src="ag-bloom.png?v=2" class="bg-img" alt="Antigravity Bloom Effect">
+                <img src="ag-bloom-2.png" class="bg-img" alt="Brain Fog Lifted">
+                <img src="ag-bloom-3.png" class="bg-img" alt="Weightless Flow">
+                <img src="ag-bloom-4.png" class="bg-img" alt="Frictionless Energy">
+                <div class="tiktok-ui">
+                    <div class="tiktok-text">
+                        <div class="overlay-text">"Watch the Antigravity activation."</div>
+                        <div class="overlay-text">"POV: Your brain fog is about to lift."</div>
+                        <div class="overlay-text">"Drop the weight. Find your flow."</div>
+                        <div class="overlay-text">"Frictionless energy looks like this."</div>
+                    </div>
+                    <div class="tiktok-footer">
+                        <h4>@ED_XI_FUEL</h4>
+                        <p>#Antigravity #FlowState #ZeroDrag</p>
+                    </div>
+                    <div class="tiktok-icons">
+                        <div class="t-icon">🤍</div>
+                        <div class="t-icon">💬</div>
+                        <div class="t-icon">↗️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-cards">
+            <div class="glass-card">
+                <div class="card-icon">🌪️</div>
+                <div class="card-title">Initiate the Bloom</div>
+                <div class="card-text">Don’t just mix your drink. <span class="card-highlight">Activate it.</span> Watch the effervescent matrix engage as it hits the water, self-agitating for a perfectly smooth, instantly bioavailable formula.</div>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon">🪶</div>
+                <div class="card-title">Defy the Drop</div>
+                <div class="card-text">No clumps. No heavy powder sinking to the bottom of your cup. Our Antigravity formula reacts instantly, <span class="card-highlight">suspending the active neuro-botanicals</span> evenly through the water.</div>
+            </div>
+            <div class="glass-card">
+                <div class="card-icon">🚀</div>
+                <div class="card-title">Light It Up</div>
+                <div class="card-text">Drop the scoop. Watch the activation. <span class="card-highlight">Feel the lift.</span> The moment the cloud hits your system, the brain fog dissipates and the heavy weight of task paralysis is gone.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="formulas-section">
+        
+        <div class="formula-half ed-xi-side">
+            <span class="fh-label">/// ED-XI (ADULT DRIVE)</span>
+            <img src="ag-tub-xi.png" alt="ED-XI Antigravity Tub" style="width: 100%; max-width: 350px; border-radius: 12px; margin-bottom: 25px; filter: drop-shadow(0 0 20px rgba(255, 107, 0, 0.4));">
+            <h3 class="fh-title">Shed the Dead Weight</h3>
+            
+            <div class="fh-block">
+                <h4>Fatigue Creates Friction</h4>
+                <p>The ED-XI formula is your Antigravity protocol. We use clinical doses of Alpha-GPC and Vasodilators to lift the physical and mental drag, so you can execute weightlessly.</p>
+            </div>
+            
+            <div class="fh-block">
+                <h4>Zero Drag. Maximum Torque.</h4>
+                <p>Stop fighting through the heavy sludge of your afternoon crash. Elevate your baseline.</p>
+            </div>
+            
+            <div class="fh-block">
+                <h4>Stay Elevated</h4>
+                <p>Traditional energy drinks give you wings, but they drop you like a stone two hours later. Our adaptogenic root stack delivers sustained, weightless momentum. No heavy crash. Just pure drive.</p>
+            </div>
+        </div>
+
+        <div class="formula-half ed-xv-side">
+            <span class="fh-label">/// ED-XV (YOUTH ZEN)</span>
+            <img src="ag-tub-xv.png" alt="ED-XV Antigravity Tub" style="width: 100%; max-width: 350px; border-radius: 12px; margin-bottom: 25px; filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.4));">
+            <h3 class="fh-title">Float Above the Static</h3>
+            
+            <div class="fh-block">
+                <h4>Defy the Distractions</h4>
+                <p>The world is heavy with noise. ED-XV is your Antigravity chamber. Formulated with L-Theanine to quiet the background static and let your focus naturally rise to the top.</p>
+            </div>
+            
+            <div class="fh-block">
+                <h4>Weightless Execution</h4>
+                <p>Precision requires a light touch. Ditch the heavy, heart-pounding caffeine jitters. Experience the weightless clarity of 100% stimulant-free focus.</p>
+            </div>
+            
+            <div class="fh-block">
+                <h4>Total Digital Zen</h4>
+                <p>When the lobby gets chaotic or the deadline looms, keep your mind light. Find your center and defy the pressure.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <footer>
+        <p>&copy; 2024 ED-XI Performance Fuels. All Rights Reserved. | Antigravity Protocol</p>
+    </footer>
+
+    <script>
+        // Generate bubbles for the hero section
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 40;
+        
+        for(let i=0; i<particleCount; i++) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            
+            // Randomize position, size, and animation duration
+            const size = Math.random() * 8 + 4;
+            const left = Math.random() * 100;
+            const duration = Math.random() * 5 + 4;
+            const delay = Math.random() * 5;
+            
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${left}%`;
+            p.style.animationDuration = `${duration}s`;
+            p.style.animationDelay = `${delay}s`;
+            
+            particlesContainer.appendChild(p);
+        }
+    </script>
+</body>
+</html>
